@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+</head>
+<body>
+
+<div class="container-fluid">
+    <form enctype="multipart/form-data" action="read-pdf.php" method="POST">
+        <input type="hidden" name="MAX_FILE_SIZE" value="300000"/>
+
+        <h1>Steg 1: Ladda ner fil från Entré eller efterfråga via e-post från Fastighetsägarna</h1>
+        <p>De här PDF-rapporterna kan användas:</p>
+        <ul>
+            <li>Hyres-,avgiftshandläggning / Medlemsförteckning</li>
+            <li>Hyres-,avgiftshandläggning / Hyresfordran</li>
+            <li>Hyres-,avgiftshandläggning / Kontrakt upphör</li>
+            <li>Hyres-,avgiftshandläggning / Objektsförteckning (rubriken i rapporten är dock Hyresgästförteckning)</li>
+            <li>Hyresgästförteckning (finns inte i Entré)</li>
+            <li>Medlemsförteckning (finns inte i Entré)</li>
+        </ul>
+        <h1>Steg 2: Välj fil</h1>
+        <p>Antingen klickar du på knappen och väljer filen eller så drar du filen från Utforskaren och släpper den på knappen.</p>
+        <div class="form-group">
+            <label for="file">Fil att konvertera</label>
+            <input name="userfile" type="file" id="file"/>
+        </div>
+        <h1>Steg 3: Välj hur filen ska visas</h1>
+        <div class="form-group">
+            <input type="radio" name="renderer" value="Html" id="rendererHtmlRenderer" checked="checked"/>
+            <label for="rendererHtmlRenderer">Tabell som visas i din webbläsare</label>
+        </div>
+        <div class="form-group">
+            <input type="radio" name="renderer" value="Text" id="rendererTextRenderer"/>
+            <label for="rendererTextRenderer">Text som passar bra att kopieras till Excel. En rad per lägenhet.</label>
+        </div>
+        <div class="form-group">
+            <input type="radio" name="renderer" value="Xml" id="rendererXmlRenderer"/>
+            <label for="rendererXmlRenderer">XML som grupperats per lägenhet</label>
+        </div>
+        <div class="form-group">
+            <input type="radio" name="renderer" value="" id="rendererRaw"/>
+            <label for="rendererRaw">Rå XML (det här formatet används vanligtvis inte alls)</label>
+        </div>
+        <h1>Steg 4: Tryck på Kör</h1>
+        <button type="submit" class="btn btn-default">Kör</button>
+    </form>
+</div>
+</body>
+</html>
