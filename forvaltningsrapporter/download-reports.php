@@ -53,7 +53,7 @@ if ($downloadReportsToday) {
     $renderer = new HtmlRenderer();
     $rendererCfg = simplexml_load_file("cfg.xml");
     mkdir(FILES_FOLDER, 0700, true);
-    foreach (REPORTS as $title => $reportCfg) {
+    foreach ($REPORTS as $title => $reportCfg) {
         $url = $reportCfg['url'];
         $filename = FILES_FOLDER . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);

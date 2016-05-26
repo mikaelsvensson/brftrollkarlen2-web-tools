@@ -1,4 +1,7 @@
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+
 require_once 'renderer/HtmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'config.php';
@@ -30,7 +33,7 @@ $joinAll = function ($a, $b) {
 $renderer->writerDocStart();
 
 $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
-foreach (REPORTS as $title => $reportCfg) {
+foreach ($REPORTS as $title => $reportCfg) {
 
     echo "<h1>$title</h1>";
 
@@ -54,6 +57,10 @@ foreach (REPORTS as $title => $reportCfg) {
 
             $reader = new ReportReader();
             $apts = $reader->getReportObjects($rendererCfg, $xml);
+
+            if (isset($reportCfg['rowprocessor'])) {
+                $apts = array_map($reportCfg['rowprocessor'], $apts);
+            }
 
             if (isset($apts)) {
                 if (isset($joiner)) {
