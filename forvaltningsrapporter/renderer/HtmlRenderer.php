@@ -27,6 +27,7 @@ class HtmlRenderer
         div.diff { margin-left: 2em; font-size: 90% }
         tr.popular td { font-size: 90%; color: #888 }
         tr.popular ul { list-style-type: none; margin: 0; padding: 0}
+        tr.entry:hover { background-color: #ddd; }
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
         <script src="template-links.js?$time"></script>
@@ -61,7 +62,7 @@ HTML_START;
 HTML_START;
 
         foreach ($apts as $apt) {
-            print "<tr>";
+            print '<tr class="entry">';
             foreach ($headers as $header) {
                 $value = join(',', $apt[$header]);
                 printf('<td class="%s">%s</td>', $header, $value);
