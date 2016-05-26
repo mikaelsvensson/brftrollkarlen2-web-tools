@@ -13,7 +13,7 @@ if (!isset($_GET['code'])) {
 } else {
     $client->authenticate($_GET['code']);
     $_SESSION['access_token'] = $client->getAccessToken();
-    $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/verktyg/report/google-document-generator.php';
+    $redirect_uri = 'http://' . $_SERVER['HTTP_HOST'] . '/verktyg/forvaltningsrapporter/google-document-generator.php';
     header('Location: ' . filter_var($redirect_uri, FILTER_SANITIZE_URL));
 }
 ?>
