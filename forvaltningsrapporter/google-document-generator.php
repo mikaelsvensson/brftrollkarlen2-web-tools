@@ -24,7 +24,14 @@ if (isset($_GET['template'])) {
 
     $params = array_merge($_GET, $defaultParams);
 
-    $content = $exported;//file_get_contents('files/report.csv');
+    // Sort by length of parameter name, so that "USERNAME" does not become "USERAlice" when parameter NAME is "Alice".
+    uksort($params, function ($a, $b) {
+        $a = strlen($a);
+        $b = strlen($b);
+        return $b - $a;
+    });
+
+    $content = $exported;
     foreach ($params as $key => $value) {
         $content = str_replace($key, utf8_decode($value), $content);
     }
@@ -37,6 +44,7 @@ if (isset($_GET['template'])) {
     $fileMetadata = new Google_Service_Drive_DriveFile(array(
         'name' => $newName,
         'mimeType' => 'application/vnd.google-apps.document'));
+    $fileMetadata->setAppProperties(array('sourceTemplate' => $template));
     $file = $drive_service->files->create($fileMetadata, array(
         'data' => $content,
         'mimeType' => 'application/rtf',
