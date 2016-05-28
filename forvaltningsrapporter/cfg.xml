@@ -9,11 +9,11 @@
         <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true"/>
         <textRule outputColumn="FakturaIntervall" pattern="^må$" isGroupStart="false"/>
         <textRule outputColumn="FakturaIntervall" pattern="^kv$" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="vägen" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="gata" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Karusellv" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Cirkusv" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Tombolav" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="vägen" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="gata" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Karusellv" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Cirkusv" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Tombolav" isGroupStart="false"/>
         <textRule outputColumn="AdressPostnr" pattern="^\d{3}\s\d{2}$" isGroupStart="false"/>
         <textRule outputColumn="AdressVaning" pattern="^(NB|\d\s+tr)$" isGroupStart="false"/>
         <textRule outputColumn="Typ" pattern="Lager" isGroupStart="false"/>
@@ -36,10 +36,10 @@
         <positionRule outputColumn="LghData" exactMatch="0 -240"/>
         <positionRule outputColumn="Belopp" exactMatch="-802 -1166"/>
         <positionRule outputColumn="Avisering" exactMatch="-12854 -720"/>
-        <positionRule outputColumn="Adress" exactMatch="0 -480"/>
+        <positionRule outputColumn="AdressGata" exactMatch="0 -480"/>
         <positionRule outputColumn="AdressPost" exactMatch="0 240"/>
-        <positionRule outputColumn="Adress" exactMatch="0 -720"/>
-        <positionRule outputColumn="Adress" exactMatch="1440 480"/>
+        <positionRule outputColumn="AdressGata" exactMatch="0 -720"/>
+        <positionRule outputColumn="AdressGata" exactMatch="1440 480"/>
     </reader>
     <reader xpathMatchPattern="/doc/TJ[starts-with(text(), 'HYRESGÄSTFÖRTECKNING')]"
             skipEntriesWithColumn="Header Footer">
@@ -56,10 +56,10 @@
         <textRule outputColumn="AvgTyp" pattern="^\d{3}\s.+" isGroupStart="false"/>
         <textRule outputColumn="AviIntervall" pattern="^Månad" isGroupStart="false"/>
         <textRule outputColumn="AviIntervall" pattern="^Kvartal$" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="vägen" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Karusellv" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Cirkusv" isGroupStart="false"/>
-        <textRule outputColumn="Adress" pattern="Tombolav" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="vägen" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Karusellv" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Cirkusv" isGroupStart="false"/>
+        <textRule outputColumn="AdressGata" pattern="Tombolav" isGroupStart="false"/>
         <textRule outputColumn="Yta" pattern="\d+,\d+" isGroupStart="false"/>
         <textRule outputColumn="AdressPlan" pattern="^(NB|\d\s+tr)$" isGroupStart="false"/>
         <textRule outputColumn="Beskrivning" pattern="Lager" isGroupStart="false"/>
@@ -129,7 +129,7 @@
         <positionRule outputColumn="Namn" exactMatch="10200 -311"/>
         <positionRule outputColumn="Namn" exactMatch="-10200 -311"/>
         <positionRule outputColumn="LghData" exactMatch="1553 0"/>
-        <positionRule outputColumn="Adress" exactMatch="1955 0"/>
+        <positionRule outputColumn="AdressGata" exactMatch="1955 0"/>
         <positionRule outputColumn="AdressPostort" exactMatch="2160 0"/>
         <positionRule outputColumn="Datum" exactMatch="4532 0"/>
     </reader>
