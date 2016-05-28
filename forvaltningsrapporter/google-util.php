@@ -14,8 +14,9 @@ function createGoogleClient()
     $client = new Google_Client();
     $client->setAuthConfigFile(GOOGLE_CLIENT_SECRET_FILE);
     $client->setRedirectUri(GOOGLE_OAUTHCALLBACK_URI);
-    $client->addScope(Google_Service_Drive::DRIVE_METADATA_READONLY);
+//    $client->addScope(Google_Service_Drive::DRIVE_METADATA);
     $client->addScope(Google_Service_Drive::DRIVE);
+    $client->addScope("http://www.google.com/m8/feeds/");
     return $client;
 }
 ?>
