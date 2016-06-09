@@ -16,7 +16,7 @@
             $(table).children("tbody").children("tr.entry").each(function (index, tr) {
                 var cells = $(tr).children("td");
 
-                cells.first().prepend($("<a>").text("[dok]").attr("href", "#").click(function (e) {
+                cells.first().prepend($("<button/>").attr("type", "button").addClass("btn btn-default btn-xs").click(function (e) {
 
                     var paramContainer = $("#parameters");
                     paramContainer.empty();
@@ -49,7 +49,7 @@
                     }
 
                     toggleDialog();
-                }));
+                }).append($("<img />").attr("src","document-small.png").addClass("glyphicon glyphicon-duplicate")));
             });
         });
     });

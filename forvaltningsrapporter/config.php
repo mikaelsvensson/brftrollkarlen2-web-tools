@@ -3,6 +3,8 @@ const FILES_FOLDER = './reports-archive/';
 
 const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
 
+$defaultParams = ['DATUM' => date('Ymd-His')];
+
 function findContacts($row, $contacts, $column)
 {
     $fn = function ($value) {
@@ -33,6 +35,7 @@ function addContactColumn(&$row, $contacts, $column)
 $REPORTS = [
     'hyresfordran' =>
         [
+            'title' => 'Hyresfordran',
             'columns' => ['LghNr', 'Fakturanr', 'Restbelopp', 'Hyresgast', 'Forfallodatum', 'DagarForsening', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/5CA3A55A0BECD55DC12579C50042A060/$File/48775_1001.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
@@ -49,6 +52,7 @@ $REPORTS = [
         ],
     'medlemsforteckning' =>
         [
+            'title' => 'Medlemmar',
             'columns' => null,
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/563B9D7BB796E5D7C12579B70048844B/$File/48775_1005.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
@@ -88,6 +92,7 @@ $REPORTS = [
         ],
     'kontrakt-upphor' =>
         [
+            'title' => 'Kontrakt',
             'columns' => ['Objekt', 'Typ', 'Hyresgast', 'Area', 'Fran', 'Till', 'DagarKvar', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/F0DAE4CB20A599E8C12579C50042A74F/$File/48775_1002.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
@@ -108,6 +113,7 @@ $REPORTS = [
         ],
     'andelstal' =>
         [
+            'title' => 'Andelstal',
             'columns' => null,
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/C99AFBE828B40038C12579F900117247/$File/48775_1004.pdf?openElement',
             'rowprocessor' => function ($row) {
@@ -124,6 +130,7 @@ $REPORTS = [
         ],
     'objektsforteckning-hyresgastforteckning' =>
         [
+            'title' => 'Objektsf&ouml;rteckning',
             'columns' => ['LghNr', 'Objekt', 'Namn1', 'Namn2', 'AdressGata', 'AdressVaning', 'AdressPostnr', 'AdressPost', 'Typ', 'Datum', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/3C82828B45507253C12579C500429889/$File/48775_1003.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {

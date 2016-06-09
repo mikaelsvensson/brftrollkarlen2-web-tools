@@ -15,12 +15,22 @@ $client = createGoogleClient();
 $client->setAccessToken($_SESSION['access_token']);
 $drive_service = new Google_Service_Drive($client);
 
-$defaultParams = ['DATUM' => date('Ymd-His')];
-
 if (isset($_GET['template'])) {
     $template = $_GET['template'];
-    $templateName = $drive_service->files->get($template)->name;
-    $exported = $drive_service->files->export($template, "application/rtf", ['alt' => 'media']);
+    $templateInfo = $drive_service->files->get($template, array("fields" => "id,name,parents,mimeType"));
+    $templateName = $templateInfo->name;
+    switch ($templateInfo->mimeType) {
+        case "application/rtf":
+        case "application/msword":
+            $exported = $drive_service->files->get($template, ['alt' => 'media']);
+            break;
+        case "application/vnd.google-apps.document":
+            $exported = $drive_service->files->export($template, "application/rtf", ['alt' => 'media']);
+            break;
+        default:
+            print "Cannot handle this MIME type: " + $templateInfo->mimeType;
+            return;
+    }
 
     $params = array_merge($_GET, $defaultParams);
 
@@ -43,8 +53,9 @@ if (isset($_GET['template'])) {
     }
     $fileMetadata = new Google_Service_Drive_DriveFile(array(
         'name' => $newName,
-        'mimeType' => 'application/vnd.google-apps.document'));
-    $fileMetadata->setAppProperties(array('sourceTemplate' => $template));
+        'mimeType' => 'application/vnd.google-apps.document',
+        'parents' => $templateInfo->parents,
+        'appProperties' => array('sourceTemplate' => $template)));
     $file = $drive_service->files->create($fileMetadata, array(
         'data' => $content,
         'mimeType' => 'application/rtf',

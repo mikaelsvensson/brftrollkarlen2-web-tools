@@ -76,27 +76,21 @@ $joinAll = function ($a, $b) {
 
     $contacts = array_map(function ($contact) {
         return [
-            'name' => $contact['title']['$t'],
+            'name' => isset($contact['title']) ? $contact['title']['$t'] : null,
             'updated' => $contact['updated']['$t'],
-            'note' => $contact['content']['$t'],
-            'email' => $contact['gd$email'][0]['address'],
-            'phone' => $contact['gd$phoneNumber'][0]['$t'],
-            'orgName' => $contact['gd$organization'][0]['gd$orgName']['$t'],
-            'orgTitle' => $contact['gd$organization'][0]['gd$orgTitle']['$t'],
-            'address' => explode("\n", $contact['gd$postalAddress'][0]['$t'])
+            'note' => isset($contact['content']) ? $contact['content']['$t'] : null,
+            'email' => isset($contact['gd$email']) ? $contact['gd$email'][0]['address'] : null,
+            'phone' => isset($contact['gd$phoneNumber']) ? $contact['gd$phoneNumber'][0]['$t'] : null,
+            'orgName' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgName']['$t'] : null,
+            'orgTitle' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgTitle']['$t'] : null,
+            'address' => isset($contact['gd$postalAddress']) ? explode("\n", $contact['gd$postalAddress'][0]['$t']) : null
         ];
     }, $response);
-
-    //        print "<pre>" . print_r($contacts, true) . "</pre>";
-    //        print "<pre>" . print_r($response, true) . "</pre>";
-    //        $response = json_encode(simplexml_load_string($responseBody));
-    //        print "<pre>" . print_r(json_decode($response, true), true) . "</pre>";
-
 
     $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
     foreach ($REPORTS as $title => $reportCfg) {
 
-        echo "<h1>$title</h1>";
+        printf("<h1>%s</h1>", $reportCfg['title']);
 
         // Configuration specifies columns in array. Filtering function should use array values as keys.
         $columns = array_fill_keys($reportCfg['columns'], null);
@@ -139,9 +133,9 @@ $joinAll = function ($a, $b) {
         }
         $reportFiles = array_keys($reportsData);
         foreach ($reportFiles as $i => $file) {
-            printf('<h2>%s <small>%s</small></h2>',
-                substr($file, strlen($title) + 1),
-                $i == 0 ? "Nul&auml;ge" : "");
+            printf('<h3>%s <small>%s</small></h3>',
+                substr(substr($file, 0, -4), strlen($title) + 1),
+                $i == 0 ? "Nul&auml;ge" : "Enbart skillnader");
 
             if ($i == 0) {
                 $renderer->write($reportsData[$file]);
