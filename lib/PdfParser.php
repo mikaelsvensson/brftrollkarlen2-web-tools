@@ -203,14 +203,14 @@ class PdfParser
                     case 'TJ':
                         $start = mb_strpos($command, '[', null, 'UTF-8') + 1;
                         $end   = mb_strrpos($command, ']', null, 'UTF-8');
-                        $text.= self::parseTextCommand(mb_substr($command, $start, $end - $start, 'UTF-8'));
+                        $text .= htmlspecialchars(self::parseTextCommand(mb_substr($command, $start, $end - $start, 'UTF-8')));
                         break;
 
                     // Display text.
                     case 'Tj':
                         $start = mb_strpos($command, '(', null, 'UTF-8') + 1;
                         $end   = mb_strrpos($command, ')', null, 'UTF-8');
-                        $text.= mb_substr($command, $start, $end - $start, 'UTF-8'); // Removes round brackets
+                        $text .= htmlspecialchars(mb_substr($command, $start, $end - $start, 'UTF-8')); // Removes round brackets
                         break;
 
                     // Set leading.
