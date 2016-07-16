@@ -14,7 +14,7 @@ body.overlay-backdrop:after {
 /* just some content with arbitrary styles for explanation purposes */
 div.overlay {
     width: 60em;
-    height: 60em;
+    height: 40em;
     /*line-height: 200px;*/
     position: fixed;
     top: 50%;
