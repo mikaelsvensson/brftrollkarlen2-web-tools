@@ -139,6 +139,12 @@ $joinAll = function ($a, $b) {
 
             if ($i == 0) {
                 $renderer->write($reportsData[$file]);
+
+                if (isset($reportCfg['summarygenerator'])) {
+                    $rowprocessor = $reportCfg['summarygenerator'];
+                    $summaryData = $rowprocessor($reportsData[$file]);
+                    $renderer->write($summaryData);
+                }
             }
             if ($i < count($reportsData) - 1) {
                 $newEntries = array_udiff($reportsData[$file], $reportsData[$reportFiles[$i + 1]], $joinAll);
@@ -162,6 +168,7 @@ $joinAll = function ($a, $b) {
     ?>
 </div>
 <?php include("index-generator-form.php") ?>
+<?php include("index-json-form.php") ?>
 </body>
 </html>
 
