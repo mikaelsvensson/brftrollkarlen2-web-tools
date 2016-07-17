@@ -36,7 +36,7 @@ $REPORTS = [
     'hyresfordran' =>
         [
             'title' => 'Hyresfordran',
-            'columns' => ['LghNr', 'Fakturanr', 'Restbelopp', 'Hyresgast', 'Forfallodatum', 'DagarForsening', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
+            'columns' => ['LghNr', 'Fakturanr', 'Restbelopp', 'Hyresgast', 'Forfallodatum', 'DagarForsening', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/5CA3A55A0BECD55DC12579C50042A060/$File/48775_1001.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
                 $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
@@ -48,6 +48,18 @@ $REPORTS = [
                 addContactColumn($row, $contacts, 'Hyresgast');
 
                 return $row;
+            },
+            'summarygenerator' => function ($data) {
+                $res = [];
+                foreach ($data as $row) {
+                    $debtee = $row['Hyresgast'][0];
+                    $amount = intval($row['Restbelopp'][0]);
+
+                    $res[$debtee]['Hyresgast'][0] = $debtee;
+                    $res[$debtee]['TotalRestbelopp'][0] += $amount;
+                    $res[$debtee]['AntalRestbelopp'][0]++;
+                }
+                return array_values($res);
             }
         ],
     'medlemsforteckning' =>
@@ -85,6 +97,8 @@ $REPORTS = [
                     $row['Status'] = [''];
                 }
 
+                $row['Antal_Ytterligare'] = [count($row['Namn']) - 1];
+
                 addContactColumn($row, $contacts, 'Namn');
 
                 return $row;
@@ -93,7 +107,7 @@ $REPORTS = [
     'kontrakt-upphor' =>
         [
             'title' => 'Kontrakt',
-            'columns' => ['Objekt', 'Typ', 'Hyresgast', 'Area', 'Fran', 'Till', 'DagarKvar', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
+            'columns' => ['Objekt', 'Typ', 'Hyresgast', 'Area', 'Fran', 'Till', 'DagarKvar', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/F0DAE4CB20A599E8C12579C50042A74F/$File/48775_1002.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
                 $period = $row['Kontraktstid'][0];
@@ -131,7 +145,7 @@ $REPORTS = [
     'objektsforteckning-hyresgastforteckning' =>
         [
             'title' => 'Objektsf&ouml;rteckning',
-            'columns' => ['LghNr', 'Objekt', 'Namn1', 'Namn2', 'AdressGata', 'AdressVaning', 'AdressPostnr', 'AdressPost', 'Typ', 'Datum', 'KontaktNamn','KontaktEpost','KontaktTelefon'],
+            'columns' => ['LghNr', 'Objekt', 'Namn1', 'Namn2', 'AdressGata', 'AdressVaning', 'AdressPostnr', 'AdressPost', 'Typ', 'Datum', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon'],
             'url' => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/3C82828B45507253C12579C500429889/$File/48775_1003.pdf?openElement',
             'rowprocessor' => function ($row, $contacts) {
                 $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
@@ -139,6 +153,18 @@ $REPORTS = [
                 addContactColumn($row, $contacts, 'Namn1');
 
                 return $row;
+            },
+            'summarygenerator' => function ($data) {
+                $res = [];
+                foreach ($data as $row) {
+                    $aptNumber = intval($row['LghNr'][0]);
+                    if ($aptNumber < 1000) {
+                        $res[$row['AdressGata'][0]]['AdressGata'] = [$row['AdressGata'][0]];
+                        $floor = str_replace(' ', '', $row['AdressVaning'][0]);
+                        $res[$row['AdressGata'][0]]['Apt' . $floor . ($aptNumber % 2)] = [$row['Namn1'][0] . (!empty($row['Namn2'][0]) ? ', ' . $row['Namn2'][0] : '')];
+                    }
+                }
+                return array_values($res);
             }
         ]
 ];
