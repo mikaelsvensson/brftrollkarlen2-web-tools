@@ -1,0 +1,5 @@
+td.narrow-column {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width:10em;
+}

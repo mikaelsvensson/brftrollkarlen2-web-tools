@@ -9,6 +9,7 @@
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="style.css">
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
@@ -129,7 +130,7 @@ foreach ($checkPoints as $title => $pairs) {
     if (strlen(trim(join("", $pairs))) > 0) {
         printf('<tr><td class="text-nowrap">%s</td>', $title);
         foreach ($allKeys as $key) {
-            printf('<td>%s</td>', $pairs[$key]);
+            printf('<td class="text-nowrap narrow-column" title="%s">%s</td>', $pairs[$key], $pairs[$key]);
         }
         printf("</tr>");
     }
@@ -137,11 +138,23 @@ foreach ($checkPoints as $title => $pairs) {
 printf('</tbody></table>');
 ?>
     <h1>Diagram</h1>
-    <?php
+<?php
+$config = json_decode(file_get_contents("config.json"));
+
 foreach ($dataPoints as $graph => $pairs) {
 
+    $matches = array_filter($config->graphs, function ($object) use ($graph) {
+        return in_array($graph, $object->reportTitles, false);
+    });
+    $graphConfig = array_values($matches)[0];
+    $title = isset($graphConfig->title) ? $graphConfig->title : $graph;
+    $description = $graphConfig->description;
+
     $chartId = md5($graph);
-    printf("<h3>%s</h3>", $graph);
+    printf("<h3>%s</h3>", $title);
+    if (isset($description)) {
+        printf("<p>%s</p>", $description);
+    }
 
     ksort($pairs);
 
@@ -232,8 +245,9 @@ foreach ($dataPoints as $graph => $pairs) {
         // Set chart options
         var options = {
             width: screen.availWidth - 100,
-            height: 300,
-            legend: {position: "none"}
+            height: <?=substr($chartId, -6) == '-delta' ? 200 : 300?>,
+            legend: {position: "none"},
+            colors: ['<?=substr($chartId, -6) == '-delta' ? '#84BB61' : '#217c00'?>']
         };
 
         // Instantiate and draw our chart, passing in some options.
