@@ -33,7 +33,7 @@ echo "<th>" . join("</th><th>", ['Fastighet', 'Objekt', 'Anm&auml;rkning', 'Utan
 echo '</tr>';
 echo '</thead>';
 echo '<tbody>';
-foreach ($report as $entry) {
+foreach ($report->payload as $entry) {
     echo '<tr>';
     echo "<td>" . join("</td><td>", array_slice($entry, 0, -4)) . "</td>";
     echo '</tr>';

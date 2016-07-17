@@ -16,6 +16,8 @@
 <div class="container-fluid">
     <h1>Enskilda Rapporter</h1>
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 include_once "SimpleXSLX.php";
 include_once "core.php";
 
@@ -47,6 +49,7 @@ function handleUploadedReportFile($uploadPath)
     move_uploaded_file($uploadPath, $destination);
 }
 
+$removeRatio = isset($_GET['removeRatio']) ? $_GET['removeRatio'] : 100;
 $uploadPath = $_FILES['userfile']['tmp_name'];
 if (!empty($uploadPath)) {
     handleUploadedReportFile($uploadPath);
@@ -58,7 +61,8 @@ $dataPoints = [];
 $reports = [];
 
 foreach ($files as $file) {
-    $reports[$file] = loadReport($file);
+    $report = loadReport($file);
+    $reports[$file] = $report->payload;
 }
 
 $links = array_combine(array_map("getReportId", array_keys($reports)), array_keys($reports));
@@ -83,27 +87,78 @@ echo "</p>";
         </div>
         <button type="submit" class="btn btn-default">Ladda upp</button>
     </form>
-    <h1>Sammanfattande Diagram</h1>
+    <h1>Anteckningar fr&aring;n de 10 senaste rapporterna</h1>
 <?php
 $dataPoints = [];
+$checkPoints = [];
 foreach ($reports as $file => $data) {
+//    var_dump($data);
     foreach ($data as $entry) {
-        list (, , , , , , $reportTitle, $key, $value, $unit) = $entry;
-        if (isset($reportTitle)) {
+        list ($building, $object, $note, $noNote, $comment, $data, $reportTitle, $key, $value, $unit) = $entry;
+
+        if (isset($reportTitle) && isset($value)) {
             $dataPoints[$reportTitle][$key] = $value;
+        } else {
+            $building = preg_replace('/(Cirkus|Tombola|Karusell)\\w*/u','$1v',$building);
+            $title = sprintf('%s, %s', $object, $building);
+            $checkPoints[$title][$key] = "$note $noNote $comment";
         }
     }
 }
 
+$allKeys = array_unique(array_merge(array_map(function ($k, $v) {
+//    var_dump($k);
+//    var_dump($v);
+    return array_keys($v);
+}, array_keys($checkPoints), $checkPoints)))[0];
+//var_dump($allKeys);
+$latest = 10;
+sort($allKeys);
+if (isset($latest)) {
+    $allKeys = array_slice($allKeys, -$latest);
+}
+
+printf('<table class="table table-striped table-hover table-condensed"><thead>');
+printf("<tr><td></td>");
+foreach ($allKeys as $key) {
+    printf('<td class="text-nowrap">%s</td>', $key);
+}
+printf('</tr></thead><tbody>');
+ksort($checkPoints);
+foreach ($checkPoints as $title => $pairs) {
+    if (strlen(trim(join("", $pairs))) > 0) {
+        printf('<tr><td class="text-nowrap">%s</td>', $title);
+        foreach ($allKeys as $key) {
+            printf('<td>%s</td>', $pairs[$key]);
+        }
+        printf("</tr>");
+    }
+}
+printf('</tbody></table>');
+?>
+    <h1>Diagram</h1>
+    <?php
 foreach ($dataPoints as $graph => $pairs) {
+
     $chartId = md5($graph);
     printf("<h3>%s</h3>", $graph);
-    printf('<div id="chart-%s">Laddar diagram...</div>', $chartId);
 
     ksort($pairs);
 
     $removedPairs = [];
     $keys = array_keys($pairs);
+
+    $lastReportId = $keys[count($keys) - 1];
+    $d = new DateTime(substr($lastReportId, 0, 4) . '-01-01');
+    $d->modify('+'.substr($lastReportId, 5).' weeks');
+    $daysSinceLastMeasurement = $d->diff(new DateTime())->days;
+    if ($daysSinceLastMeasurement > 90) {
+        printf('<p>Hoppar &ouml;ver diagrammet eftersom inga v&auml;rden rapporterats p&aring; %s dagar.</p>', $daysSinceLastMeasurement);
+        continue;
+    }
+
+    printf('<div id="chart-%s">Laddar diagram...</div>', $chartId);
+
     $newPairs = [];
     $lastValid = null;
     $decrements = 0;
@@ -112,7 +167,7 @@ foreach ($dataPoints as $graph => $pairs) {
         $thisValue = str_replace(',', '.', $thisValue);
         if (isset($lastValid)) {
             $ratio = 1.0 * $thisValue / $lastValid;
-            if ($ratio < (1 / 4) || $ratio > 4) {
+            if ($ratio < (1 / $removeRatio) || $ratio > $removeRatio) {
                 $removedPairs[$keys[$i]] = $thisValue;
                 continue;
             }
@@ -150,7 +205,7 @@ foreach ($dataPoints as $graph => $pairs) {
     }
 
     if (count($removedPairs) > 0) {
-        printf('<p>Automatiskt borttagna m&auml;tv&auml;rden:<ul><li>%s</li></ul></p>', join('</li><li>', array_map(function ($k, $v) {
+        printf('<p>Automatiskt borttagna m&auml;tv&auml;rden (<a href="?removeRatio=3">rensa mycket</a>, <a href="?removeRatio=100">rensa lite</a>):<ul><li>%s</li></ul></p>', join('</li><li>', array_map(function ($k, $v) {
             return "$k: $v";
         }, array_keys($removedPairs), $removedPairs)));
     }
