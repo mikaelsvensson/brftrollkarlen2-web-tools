@@ -1,10 +1,12 @@
 <?php
+// Include Composer autoloader if not already done.
+include '../vendor/autoload.php';
+
 include 'renderer/HtmlRenderer.php';
 include 'renderer/TextRenderer.php';
 include 'renderer/XmlRenderer.php';
 include 'ReportReader.php';
-
-require_once '../lib/PdfParser.php';
+include 'PdfParserWrapper.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     readfile('read.html');
@@ -12,7 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 }
 
 $filename = $_FILES['userfile']['tmp_name'];
-$content = PdfParser::parseFile($filename);
+$wrapper = new PdfParserWrapper();
+$content = $wrapper->pdfToXml($filename);
 
 if ($_POST['renderer']) {
     $className = $_POST['renderer'] . 'Renderer';

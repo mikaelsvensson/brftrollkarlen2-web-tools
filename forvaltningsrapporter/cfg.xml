@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <config>
-    <reader xpathMatchPattern="/doc/Tj[text() = 'HYRESGÄSTFÖRTECKNING']" skipEntriesWithColumn="Header Footer">
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'HYRESGÄSTFÖRTECKNING']" skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
         <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
@@ -21,7 +21,8 @@
         <textRule outputColumn="Avisering" pattern="giro" isGroupStart="false"/>
 
         <positionRule outputColumn="InOutDatum" exactMatch="0 720"/>
-        <textRule outputColumn="InflyttAvflytt" pattern="\d{4}-\d{2}-\d{2}" isGroupStart="false" followingOutputColumns="FromTom ObjFromTom"/>
+        <textRule outputColumn="InflyttAvflytt" pattern="\d{4}-\d{2}-\d{2}" isGroupStart="false"
+                  followingOutputColumns="FromTom ObjFromTom"/>
 
         <positionRule outputColumn="Namn1" exactMatch="3720 720"/>
         <positionRule outputColumn="Namn1" exactMatch="3720 240"/>
@@ -32,7 +33,8 @@
         <positionRule outputColumn="Typ" exactMatch="1680 240"/>
         <positionRule outputColumn="Typ" exactMatch="1080 960"/>
         <textRule outputColumn="KrKvm" pattern="\d{3,},\d" isGroupStart="false"/>
-        <textRule outputColumn="LghArea" pattern="\d{1,2},\d" isGroupStart="false" followingOutputColumns="ContractArea"/>
+        <textRule outputColumn="LghArea" pattern="\d{1,2},\d" isGroupStart="false"
+                  followingOutputColumns="ContractArea"/>
         <positionRule outputColumn="LghData" exactMatch="0 -240"/>
         <positionRule outputColumn="Belopp" exactMatch="-802 -1166"/>
         <positionRule outputColumn="Avisering" exactMatch="-12854 -720"/>
@@ -41,7 +43,7 @@
         <positionRule outputColumn="AdressGata" exactMatch="0 -720"/>
         <positionRule outputColumn="AdressGata" exactMatch="1440 480"/>
     </reader>
-    <reader xpathMatchPattern="/doc/TJ[starts-with(text(), 'HYRESGÄSTFÖRTECKNING')]"
+    <reader xpathMatchPattern="/doc/row/TJ[starts-with(text(), 'HYRESGÄSTFÖRTECKNING')]"
             skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
@@ -52,7 +54,8 @@
         <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true"
                   followingOutputColumns="DatumInflyttAvflytt Hyresgäst"/>
         <textRule outputColumn="AdressPostnr" pattern="^\d{3}\s\d{2}" isGroupStart="false"/>
-        <textRule outputColumn="AvgTyp" pattern="^(101|301)\s.+" isGroupStart="false" followingOutputColumns="AvgTotal AvgKrPerM2"/>
+        <textRule outputColumn="AvgTyp" pattern="^(101|301)\s.+" isGroupStart="false"
+                  followingOutputColumns="AvgTotal AvgKrPerM2"/>
         <textRule outputColumn="AvgTyp" pattern="^\d{3}\s.+" isGroupStart="false"/>
         <textRule outputColumn="AviIntervall" pattern="^Månad" isGroupStart="false"/>
         <textRule outputColumn="AviIntervall" pattern="^Kvartal$" isGroupStart="false"/>
@@ -89,35 +92,36 @@
         <positionRule outputColumn="Beskrivning" exactMatch="1.0001 0 0 1 11.28 321.84"/>
         <positionRule outputColumn="Beskrivning" exactMatch="1.0001 0 0 1 11.28 414.24"/>
 
-        <positionRule outputColumn="AviAdress" exactMatch="1.0001 0 0 1 151.44 206.88" followingOutputColumns="UppsFörl AviPostort"/>
+        <positionRule outputColumn="AviAdress" exactMatch="1.0001 0 0 1 151.44 206.88"
+                      followingOutputColumns="UppsFörl AviPostort"/>
     </reader>
-<!--
-    <reader xpathMatchPattern="/doc/TJ[starts-with(text(), 'MEDLEMSFÖRTECKNING')]"
-            skipEntriesWithColumn="Header Footer">
+    <!--
+        <reader xpathMatchPattern="/doc/row/TJ[starts-with(text(), 'MEDLEMSFÖRTECKNING')]"
+                skipEntriesWithColumn="Header Footer">
 
-        <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
-        <textRule outputColumn="Footer" pattern="Trollkarlen 2" isGroupStart="true"/>
-        <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
-        <textRule outputColumn="Header" pattern="^MEDLEMSFÖRTECKNING" isGroupStart="true"/>
+            <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
+            <textRule outputColumn="Footer" pattern="Trollkarlen 2" isGroupStart="true"/>
+            <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
+            <textRule outputColumn="Header" pattern="^MEDLEMSFÖRTECKNING" isGroupStart="true"/>
 
-        <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true"/>
-        <textRule outputColumn="Personnr" pattern="^\d{6}" isGroupStart="false" followingOutputColumns="Inträde Förvärv AntalRum AdressGata AdressPostnr AdressPostort"/>
-    </reader>
--->
-<!--
-    <reader xpathMatchPattern="/doc/Tm[@cmd='1 0 0 -1 825 505']"
-            skipEntriesWithColumn="Header Footer">
+            <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true"/>
+            <textRule outputColumn="Personnr" pattern="^\d{6}" isGroupStart="false" followingOutputColumns="Inträde Förvärv AntalRum AdressGata AdressPostnr AdressPostort"/>
+        </reader>
+    -->
+    <!--
+        <reader xpathMatchPattern="/doc/row/Tm[@cmd='1 0 0 -1 825 505']"
+                skipEntriesWithColumn="Header Footer">
 
-        <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
-        <textRule outputColumn="Footer" pattern="Trollkarlen 2" isGroupStart="true"/>
-        <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
-        <textRule outputColumn="Header" pattern="^MEDLEMSFÖRTECKNING" isGroupStart="true"/>
+            <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
+            <textRule outputColumn="Footer" pattern="Trollkarlen 2" isGroupStart="true"/>
+            <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
+            <textRule outputColumn="Header" pattern="^MEDLEMSFÖRTECKNING" isGroupStart="true"/>
 
-        <positionRule outputColumn="Namn" exactMatch="-10200 -311" isGroupStart="true" followingOutputColumns="Inträde AntalRum AdressGata AdressPostort"/>
-        <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true" followingOutputColumns="Namn Inträde AntalRum AdressGata AdressPostort"/>
-    </reader>
--->
-    <reader xpathMatchPattern="/doc/Tj[text() = 'Medlemsförteckning']" skipEntriesWithColumn="Header Footer">
+            <positionRule outputColumn="Namn" exactMatch="-10200 -311" isGroupStart="true" followingOutputColumns="Inträde AntalRum AdressGata AdressPostort"/>
+            <textRule outputColumn="Objekt" pattern="^18916-" isGroupStart="true" followingOutputColumns="Namn Inträde AntalRum AdressGata AdressPostort"/>
+        </reader>
+    -->
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'Medlemsförteckning']" skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
         <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
@@ -133,7 +137,7 @@
         <positionRule outputColumn="AdressPostort" exactMatch="2160 0"/>
         <positionRule outputColumn="Datum" exactMatch="4532 0"/>
     </reader>
-    <reader xpathMatchPattern="/doc/Tj[text() = 'HYRESFORDRAN']" skipEntriesWithColumn="Header Footer">
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'HYRESFORDRAN']" skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Fakturanr" pattern="48775\d+" isGroupStart="true"/>
         <textRule outputColumn="Header" pattern="HYRESFORDRAN" isGroupStart="false"/>
@@ -155,7 +159,7 @@
         <positionRule outputColumn="Typ" exactMatch="2160 0"/>
         <!--<positionRule outputColumn="Datum" exactMatch="-4800 -348"/>-->
     </reader>
-    <reader xpathMatchPattern="/doc/Tj[text() = 'KONTRAKT UPPHÖR']" skipEntriesWithColumn="Header Footer">
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'KONTRAKT UPPHÖR']" skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Header" pattern="48775 Trollkarlen 2 Brf" isGroupStart="false"/>
         <textRule outputColumn="Footer" pattern="Copyright" isGroupStart="true"/>
@@ -182,7 +186,22 @@
         <!--<positionRule outputColumn="Omförhandling" exactMatch=""/>-->
 
     </reader>
-    <reader xpathMatchPattern="/doc/Tj[text() = 'Andelstal']" skipEntriesWithColumn="Header Footer">
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'LÄGENHETSFÖRTECKNING']" skipEntriesWithColumn="PageStart">
+
+        <positionRule outputColumn="PageStart" exactMatch="1454 -1422" isGroupStart="true"/>
+        <textRule outputColumn="PageStart" pattern="LÄGENHETSFÖRTECKNING" isGroupStart="true"/>
+        <textRule outputColumn="LghData" pattern="rum och" isGroupStart="true"
+                  followingOutputColumns="Area ProcentArsavgift UpplatelseAvgift Insats AdressPostnr"/>
+
+        <textRule outputColumn="Objekt" pattern="^18916-"/>
+        <positionRule outputColumn="AdressGata" exactMatch="-5051 -2" followingOutputColumns=""/>
+
+        <textRule outputColumn="Vaning" pattern="tr$"/>
+        <textRule outputColumn="Vaning" pattern="NB"/>
+        <positionRule outputColumn="AdressGata" exactMatch="-5051 -2"/>
+
+    </reader>
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'Andelstal']" skipEntriesWithColumn="Header Footer">
 
         <textRule outputColumn="Header" pattern="48775 Trollkarlen 2 Brf" isGroupStart="false"/>
         <textRule outputColumn="Header" pattern="Användare" isGroupStart="true"/>
@@ -205,5 +224,21 @@
         <!--<positionRule outputColumn="AndelFörmögenhet" exactMatch="-1726 0"/>-->
 
         <positionRule outputColumn="Area" exactMatch="7982 0"/>
+    </reader>
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'Resultaträkning']"
+            skipEntriesWithColumn="PageStart Query"
+            sortColumnsByPosition="true">
+
+        <textRule outputColumn="PageStart" pattern="^Resultat" isGroupStart="false"/>
+        <positionRule outputColumn="PageStart" exactMatch="-40.35 -12"/>
+        <textRule outputColumn="PageStart" pattern="\d{4}-\d{2}-\d{2}" isGroupStart="false"/>
+
+        <textRule outputColumn="PageStart" pattern="^Sida" isGroupStart="false"/>
+        <textRule outputColumn="PageStart" pattern="Incit Xpand" isGroupStart="false"/>
+
+        <textRule outputColumn="Konto" pattern="^\d{4}$" isGroupStart="true"
+                  followingOutputColumns="Kontonamn AccUtfall BudgetHelar Procent PeriodUtfall AccUtfallForegAr"/>
+        <textRule outputColumn="Summarubriker" pattern="^summa"
+                  followingOutputColumns="AccUtfall BudgetHelar Procent PeriodUtfall AccUtfallForegAr"/>
     </reader>
 </config>

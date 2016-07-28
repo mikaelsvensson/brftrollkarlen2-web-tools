@@ -1,11 +1,13 @@
 <?php
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
+// Include Composer autoloader if not already done.
+include '../vendor/autoload.php';
 
 require_once 'renderer/BootstrapHtmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'config.php';
-require_once '../lib/PdfParser.php';
+include 'PdfParserWrapper.php';
 require_once 'google-util.php';
 
 $isAccessTokenSet = isset($_SESSION['access_token']) && $_SESSION['access_token'];
@@ -106,7 +108,9 @@ $joinAll = function ($a, $b) {
             if (substr($file, 0, strlen($title)) == $title) {
                 $filename = FILES_FOLDER . $file;
 
-                $content = PdfParser::parseFile($filename);
+                $wrapper = new PdfParserWrapper();
+                $content = $wrapper->pdfToXml($filename);
+//                $content = PdfParser::parseFile($filename);
 
                 $xml = simplexml_load_string($content);
 

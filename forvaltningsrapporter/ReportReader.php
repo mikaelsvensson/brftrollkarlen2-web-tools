@@ -1,4 +1,5 @@
 <?php
+
 class ReportReader
 {
     function create_filter_function($skipAptHeaders)
@@ -11,7 +12,6 @@ class ReportReader
     function getReportObjects($cfg, $xml)
     {
         $apts = array();
-        $apt = array();
         $field = 'ExtraInformation';
         $i = 0;
 
@@ -26,55 +26,71 @@ class ReportReader
             return null;
         }
         $skipAptIfHeaderExists = explode(' ', "" . $reader['skipEntriesWithColumn']);
-
-        $positionRules = $reader->positionRule;
-        $rules = $reader->textRule;
+        $sortColumnsByPosition = 'true' == $reader['sortColumnsByPosition'];
 
         $followingOutputColumns = [];
 
-        foreach ($xml->children() as $cmd) {
-            $name = $cmd->getName();
-            $value = trim($cmd);
-            switch ($name) {
-                case 'Tj':
-                case 'TJ':
-                    $x = array_shift($followingOutputColumns);
-                    if ($x == null || strlen(trim($x)) == 0) {
-                        foreach ($reader->textRule as $rule) {
-                            list($key, $pattern, $new) = array("" . $rule['outputColumn'], "" . $rule['pattern'], $rule['isGroupStart'] == 'true');
-                            if (preg_match("/$pattern/i", $value)) {
+        $rows = $xml->children();
+        foreach ($rows as $row) {
+
+            $rowItems = null;
+            if ($sortColumnsByPosition) {
+                $i++;
+                $rowItems = array();
+                foreach ($row->children() as $child) {
+                    $rowItems[] = $child;
+                }
+                usort($rowItems, function ($a, $b) {
+                    return floatval($a['x']) - floatval($b['x']);
+                });
+            } else {
+                $rowItems = $row->children();
+            }
+
+            foreach ($rowItems as $cmd) {
+                $name = $cmd->getName();
+                $value = trim($cmd);
+                switch ($name) {
+                    case 'Tj':
+                    case 'TJ':
+                        $x = array_shift($followingOutputColumns);
+                        if ($x == null || strlen(trim($x)) == 0) {
+                            foreach ($reader->textRule as $rule) {
+                                list($key, $pattern, $new) = array("" . $rule['outputColumn'], "" . $rule['pattern'], $rule['isGroupStart'] == 'true');
+                                if (preg_match("/$pattern/i", $value)) {
+                                    $field = $key;
+                                    if ($new) {
+                                        $i++;
+                                    }
+                                    if ($rule['followingOutputColumns'] != null) {
+                                        $followingOutputColumns = explode(' ', $rule['followingOutputColumns']);
+                                    }
+                                    break;
+                                }
+                            }
+                        } else {
+                            $field = $x;
+                        }
+                        $apts[$i][$field][] = "$value";
+                        break;
+                    case 'Td':
+                    case 'Tm':
+                        $field = 'ExtraInformation';
+                        foreach ($reader->positionRule as $rule) {
+                            list($key, $pos, $posX, $posY, $new) = array("" . $rule['outputColumn'], "" . $rule['exactMatch'], "" . $rule['exactX'], "" . $rule['exactY'], $rule['isGroupStart'] == 'true');
+                            if ($cmd['cmd'] != '' && ($cmd['cmd'] == $pos || explode(' ', $cmd['cmd'])[0] == $posX || explode(' ', $cmd['cmd'])[1] == $posY)) {
                                 $field = $key;
                                 if ($new) {
                                     $i++;
                                 }
                                 if ($rule['followingOutputColumns'] != null) {
-                                    $followingOutputColumns = explode(' ', $rule['followingOutputColumns']);
+                                    $followingOutputColumns = explode(' ', "$field " . $rule['followingOutputColumns']);
                                 }
                                 break;
                             }
                         }
-                    } else {
-                        $field = $x;
-                    }
-                    $apts[$i][$field][] = "$value";
-                    break;
-                case 'Td':
-                case 'Tm':
-                    $field = 'ExtraInformation';
-                    foreach ($reader->positionRule as $rule) {
-                        list($key, $pos, $new) = array("" . $rule['outputColumn'], "" . $rule['exactMatch'], $rule['isGroupStart'] == 'true');
-                        if ($cmd['cmd'] == $pos) {
-                            $field = $key;
-                            if ($new) {
-                                $i++;
-                            }
-                            if ($rule['followingOutputColumns'] != null) {
-                                $followingOutputColumns = explode(' ', "$field " . $rule['followingOutputColumns']);
-                            }
-                            break;
-                        }
-                    }
-                    break;
+                        break;
+                }
             }
         }
 
