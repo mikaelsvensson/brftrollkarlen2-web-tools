@@ -16,6 +16,10 @@ gemensamma Google-konto.
 
 I bakgrunden används en styrelsemedlems Entré-konto för att logga in i Entré och hämta rapporterna.
 
+Kända problem:
+* Efter ett tag blir man utloggad från Google men det visas inget felmeddelande. Det enda som händer är att rapporterna
+inte visas. Testa att klicka på "Logga ut och logga in" och försök igen.
+
 ## lib
 
 Används för externa PHP-bibliotek. I dagsläget det om följande:
