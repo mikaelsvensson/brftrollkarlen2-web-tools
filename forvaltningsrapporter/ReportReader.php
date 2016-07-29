@@ -41,7 +41,12 @@ class ReportReader
                     $rowItems[] = $child;
                 }
                 usort($rowItems, function ($a, $b) {
-                    return floatval($a['x']) - floatval($b['x']);
+                    if (floatval($a['x']) == floatval($b['x'])) {
+                        // Sort by command name for when two commands share the same X coordiate. This is not ideal since it may change the original order but without this additional sort condition the sort order was unpredicatable, so it's better with a predictable order then unknown order.
+                        return strcmp($a->getName(), $b->getName());
+                    } else {
+                        return floatval($a['x']) - floatval($b['x']);
+                    }
                 });
             } else {
                 $rowItems = $row->children();
@@ -75,10 +80,11 @@ class ReportReader
                         break;
                     case 'Td':
                     case 'Tm':
+                        $commandAttr = (string)$cmd['cmd'];
                         $field = 'ExtraInformation';
                         foreach ($reader->positionRule as $rule) {
                             list($key, $pos, $posX, $posY, $new) = array("" . $rule['outputColumn'], "" . $rule['exactMatch'], "" . $rule['exactX'], "" . $rule['exactY'], $rule['isGroupStart'] == 'true');
-                            if ($cmd['cmd'] != '' && ($cmd['cmd'] == $pos || explode(' ', $cmd['cmd'])[0] == $posX || explode(' ', $cmd['cmd'])[1] == $posY)) {
+                            if ($commandAttr != '' && ($commandAttr == $pos || explode(' ', $commandAttr)[0] == $posX || explode(' ', $commandAttr)[1] == $posY)) {
                                 $field = $key;
                                 if ($new) {
                                     $i++;

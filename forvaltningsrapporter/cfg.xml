@@ -231,6 +231,8 @@
 
         <textRule outputColumn="PageStart" pattern="^Resultat" isGroupStart="false"/>
         <positionRule outputColumn="PageStart" exactMatch="-40.35 -12"/>
+        <positionRule outputColumn="Rubrik" exactMatch="0 -27.5"/>
+        <positionRule outputColumn="Rubrik" exactMatch="-371.25 -13.75"/>
         <textRule outputColumn="PageStart" pattern="\d{4}-\d{2}-\d{2}" isGroupStart="false"/>
 
         <textRule outputColumn="PageStart" pattern="^Sida" isGroupStart="false"/>
@@ -238,7 +240,7 @@
 
         <textRule outputColumn="Konto" pattern="^\d{4}$" isGroupStart="true"
                   followingOutputColumns="Kontonamn AccUtfall BudgetHelar Procent PeriodUtfall AccUtfallForegAr"/>
-        <textRule outputColumn="Summarubriker" pattern="^summa"
+        <textRule outputColumn="Rubrik" pattern="^summa"
                   followingOutputColumns="AccUtfall BudgetHelar Procent PeriodUtfall AccUtfallForegAr"/>
     </reader>
 </config>
