@@ -5,6 +5,34 @@ const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
 
 $defaultParams = ['DATUM' => date('Ymd-His')];
 
+function getGoogleContacts($client)
+{
+    $feedURL = "https://www.google.com/m8/feeds/contacts/default/thin?max-results=1000&alt=json";
+    //        $feedURL = "https://www.google.com/m8/feeds/contacts/default/full";
+    $req = new Google_Http_Request($feedURL);
+    $val = $client->getAuth()->authenticatedRequest($req);
+
+    //        var_dump($val);
+    // The contacts api only returns XML responses.
+    $responseRaw = $val->getResponseBody();
+
+    $response = json_decode($responseRaw, true)['feed']['entry'];
+
+    $contacts = array_map(function ($contact) {
+        return [
+            'name' => isset($contact['title']) ? $contact['title']['$t'] : null,
+            'updated' => $contact['updated']['$t'],
+            'note' => isset($contact['content']) ? $contact['content']['$t'] : null,
+            'email' => isset($contact['gd$email']) ? $contact['gd$email'][0]['address'] : null,
+            'phone' => isset($contact['gd$phoneNumber']) ? $contact['gd$phoneNumber'][0]['$t'] : null,
+            'orgName' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgName']['$t'] : null,
+            'orgTitle' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgTitle']['$t'] : null,
+            'address' => isset($contact['gd$postalAddress']) ? explode("\n", $contact['gd$postalAddress'][0]['$t']) : null
+        ];
+    }, $response);
+    return $contacts;
+}
+
 function findContacts($row, $contacts, $column)
 {
     $fn = function ($value) {
