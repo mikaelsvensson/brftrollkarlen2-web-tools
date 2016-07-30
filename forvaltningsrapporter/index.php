@@ -41,6 +41,15 @@ function printReportsMenu($selectedReportId)
 </head>
 <body>
 <div class="container-fluid">
+    <?php
+    try {
+        $contacts = getGoogleContacts($client);
+    } catch (Exception $e) {
+        printf('<p>%s</p><p>Ofta hjälper det att <a href="auth-signout.php">logga in igen</a>.</p>', $e->getMessage());
+        echo '</div></body></html>';
+        exit();
+    }
+    ?>
     <p style="position: absolute; top: 0; right: 0; padding: 0.3em;">
         <a href="auth-signout.php">Logga ut och logga in</a>
     </p>
@@ -60,14 +69,12 @@ function printReportsMenu($selectedReportId)
                     <?php
                     printReportsMenu($reportId);
                     ?>
-                    <li class="<?=$reportId == 'custom' ? 'active' : ''?>"><a href="?report=custom">Egen...</a></li>
+                    <li class="<?= $reportId == 'custom' ? 'active' : '' ?>"><a href="?report=custom">Egen...</a></li>
                 </ul>
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
     <?php
-
-    $contacts = getGoogleContacts($client);
 
     if ($reportId == 'custom') {
         readfile('index-custom-report-form.html');;
