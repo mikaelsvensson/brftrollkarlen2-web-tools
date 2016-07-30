@@ -32,7 +32,7 @@ function printReport($title, $contacts)
 
     $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
     $renderer = new BootstrapHtmlRenderer();
-    $rendererCfg = simplexml_load_file("cfg.xml");
+    $rendererCfg = simplexml_load_file("ReportReaderConfig.xml");
 
     $reportCfg = $REPORTS[$title];
 

@@ -51,7 +51,7 @@ $timestamp = date('Ymd');
 $downloadReportsToday = in_array(substr($timestamp, -2), REPORT_DAYS);
 if ($downloadReportsToday) {
     $renderer = new HtmlRenderer();
-    $rendererCfg = simplexml_load_file("cfg.xml");
+    $rendererCfg = simplexml_load_file("ReportReaderConfig.xml");
     mkdir(FILES_FOLDER, 0700, true);
     foreach ($REPORTS as $title => $reportCfg) {
         $url = $reportCfg['url'];

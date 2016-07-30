@@ -28,7 +28,7 @@ if ($_POST['renderer']) {
     $renderer = new $className;
     if ($renderer) {
         $xml = simplexml_load_string($content);
-        $cfg = simplexml_load_file("cfg.xml");
+        $cfg = simplexml_load_file("ReportReaderConfig.xml");
 
         $reader = new ReportReader();
         $apts = $reader->getReportObjects($cfg, $xml);
