@@ -1,19 +1,25 @@
 <?php
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+
 // Include Composer autoloader if not already done.
-include '../vendor/autoload.php';
+require_once '../vendor/autoload.php';
 
-include 'renderer/HtmlRenderer.php';
-include 'renderer/TextRenderer.php';
-include 'renderer/XmlRenderer.php';
-include 'ReportReader.php';
-include 'PdfParserWrapper.php';
+require_once 'renderer/HtmlRenderer.php';
+require_once 'renderer/TextRenderer.php';
+require_once 'renderer/XmlRenderer.php';
+require_once 'ReportReader.php';
+require_once 'PdfParserWrapper.php';
 
-if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    readfile('read.html');
-    exit;
-}
+//if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+//    readfile('index-custom-report-form.html');
+//    exit;
+//}
 
 $filename = $_FILES['userfile']['tmp_name'];
+if (!file_exists($filename)) {
+    die('Ingen fil');
+}
 $wrapper = new PdfParserWrapper();
 $content = $wrapper->pdfToXml($filename);
 

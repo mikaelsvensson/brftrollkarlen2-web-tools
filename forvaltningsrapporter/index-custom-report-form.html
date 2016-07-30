@@ -1,0 +1,41 @@
+<form enctype="multipart/form-data" action="read-pdf.php" method="POST" target="_blank">
+    <input type="hidden" name="MAX_FILE_SIZE" value="300000"/>
+
+    <h3>Steg 1: Ladda ner fil från Entré eller efterfråga via e-post från Fastighetsägarna</h3>
+    <p>De här PDF-rapporterna kan användas:</p>
+    <ul>
+        <li>Hyres-,avgiftshandläggning / Medlemsförteckning</li>
+        <li>Hyres-,avgiftshandläggning / Hyresfordran</li>
+        <li>Hyres-,avgiftshandläggning / Kontrakt upphör</li>
+        <li>Hyres-,avgiftshandläggning / Objektsförteckning (rubriken i rapporten är dock Hyresgästförteckning)</li>
+        <li>Hyresgästförteckning (finns inte i Entré)</li>
+        <li>Medlemsförteckning (finns inte i Entré)
+        <li>Resultaträkning (från Xpand)</li>
+    </ul>
+    <h3>Steg 2: Välj fil</h3>
+    <p>Antingen klickar du på knappen och väljer filen eller så drar du filen från Utforskaren och släpper den på
+        knappen.</p>
+    <div class="form-group">
+        <label for="file">Fil att konvertera</label>
+        <input name="userfile" type="file" id="file"/>
+    </div>
+    <h3>Steg 3: Välj hur filen ska visas</h3>
+    <div class="form-group">
+        <input type="radio" name="renderer" value="Html" id="rendererHtmlRenderer" checked="checked"/>
+        <label for="rendererHtmlRenderer">Tabell som visas i din webbläsare</label>
+    </div>
+    <div class="form-group">
+        <input type="radio" name="renderer" value="Text" id="rendererTextRenderer"/>
+        <label for="rendererTextRenderer">Text som passar bra att kopieras till Excel. En rad per lägenhet.</label>
+    </div>
+    <div class="form-group">
+        <input type="radio" name="renderer" value="Xml" id="rendererXmlRenderer"/>
+        <label for="rendererXmlRenderer">XML</label>
+    </div>
+    <div class="form-group">
+        <input type="radio" name="renderer" value="" id="rendererRaw"/>
+        <label for="rendererRaw" title="Används vanligtvis bara i felsökningssyfte. Det här alternativet bryr sig inte om vilken typ av rapport som ska visas.">Rå PDF-data i XML-format</label>
+    </div>
+    <!--<h3>Steg 4: Tryck på Kör</h3>-->
+    <button type="submit" class="btn btn-default">Ladda upp och visa rapport</button>
+</form>
