@@ -69,7 +69,8 @@ class PdfParserWrapper
                         $x = array_pop($values);
                         if ($x > 0) {
                         }
-                        if ($y < 0) {
+                        if ($y < -1.0) {
+                            // The Y position has changed by more than an insignificant amount. Assume this means that a new report row has been found.
                             $accX = 0;
                             $text .= '</row><row>';
                         } elseif ($y == 0) {

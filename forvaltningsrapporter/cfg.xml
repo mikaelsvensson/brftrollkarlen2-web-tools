@@ -243,4 +243,28 @@
         <textRule outputColumn="Rubrik" pattern="^summa"
                   followingOutputColumns="AccUtfall BudgetHelar Procent PeriodUtfall AccUtfallForegAr"/>
     </reader>
+    <reader xpathMatchPattern="/doc/row/Tj[text() = 'Huvudbok']"
+            skipEntriesWithColumn="PageStart Query ColumnHeader HideRow"
+            sortColumnsByPosition="false">
+
+        <positionRule outputColumn="Rubrik" exactMatch="0 -11.75" isGroupStart="true"/>
+
+        <textRule outputColumn="Rubrik" pattern="^Summa:$" followingOutputColumns="Debet Kredit" isGroupStart="true"/>
+        <textRule outputColumn="Rubrik" pattern="^Summa" followingOutputColumns="Debet Kredit"/>
+
+        <textRule outputColumn="PageStart" pattern="^Huvudbok" isGroupStart="false"/>
+        <textRule outputColumn="ColumnHeader" pattern="^Verifikatid$" isGroupStart="true"/>
+        <textRule outputColumn="ColumnHeader" pattern="^Konto$" isGroupStart="true"/>
+        <positionRule outputColumn="PageStart" exactMatch="-36.5 -12"/>
+
+        <textRule outputColumn="Konto" pattern="^\d{4}$" isGroupStart="true"
+                  followingOutputColumns="Kontonamn Rubrik BalansIn SaldoIn Rubrik"/>
+
+        <textRule outputColumn="Volym" pattern="0,0000" isGroupStart="true" followingOutputColumns="Verifikatid BokfDatum"/>
+        <textRule outputColumn="Kredit" pattern="^-\d[\s\d]*,\d{2}" />
+        <textRule outputColumn="Debet" pattern="^\d[\s\d]*,\d{2}" />
+        <textRule outputColumn="HideRow" pattern="Förändring" followingOutputColumns="Rubrik Debet Kredit Volym Rubrik Förändring SaldoUt" isGroupStart="true"/>
+
+        <textRule outputColumn="PageStart" pattern="Incit Xpand" isGroupStart="false"/>
+    </reader>
 </config>
