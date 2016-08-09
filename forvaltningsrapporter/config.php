@@ -8,17 +8,21 @@ $defaultParams = ['DATUM' => date('Ymd-His')];
 function getGoogleContacts($client)
 {
     $feedURL = "https://www.google.com/m8/feeds/contacts/default/thin?max-results=1000&alt=json";
+    $feedURL = "https://www.google.com/m8/feeds/contacts/default/full?max-results=1000&alt=json";
     //        $feedURL = "https://www.google.com/m8/feeds/contacts/default/full";
-    $req = new Google_Http_Request($feedURL);
+    $req = new Google_Http_Request($feedURL, 'GET', array("GData-Version" => "3.0"));
     $val = $client->getAuth()->authenticatedRequest($req);
 
-    //        var_dump($val);
     // The contacts api only returns XML responses.
     $responseRaw = $val->getResponseBody();
 
     $response = json_decode($responseRaw, true)['feed']['entry'];
 
     $contacts = array_map(function ($contact) {
+        $aptAccessFromDateProps = array_filter($contact['gContact$userDefinedField'],
+            function ($item) {
+                return strpos($item['key'], 'Tilltr') != -1;
+            });
         return [
             'name' => isset($contact['title']) ? $contact['title']['$t'] : null,
             'updated' => $contact['updated']['$t'],
@@ -27,6 +31,7 @@ function getGoogleContacts($client)
             'phone' => isset($contact['gd$phoneNumber']) ? $contact['gd$phoneNumber'][0]['$t'] : null,
             'orgName' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgName']['$t'] : null,
             'orgTitle' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgTitle']['$t'] : null,
+            'aptAccessFrom' => count($aptAccessFromDateProps) > 0 ? $aptAccessFromDateProps[0]['value'] : null,
             'address' => isset($contact['gd$postalAddress']) ? explode("\n", $contact['gd$postalAddress'][0]['$t']) : null
         ];
     }, $response);
@@ -52,6 +57,21 @@ function addContactColumn(&$row, $contacts, $column)
 //                print_r($matchingContacts);
     if (count($matchingContacts) > 0) {
         $contact = array_pop($matchingContacts);
+        if (preg_match('/\d{1,3}%/', $contact["orgName"], $ownershipPercent)) {
+            $row['KontaktAgarandel'] = [$ownershipPercent[0]];
+        }
+        if (preg_match('/\d{4}/', $contact["orgName"], $addrNumber)) {
+            $row['KontaktAddrLgnNr'] = [$addrNumber[0]];
+        }
+//        if (preg_match('/\d{3}\D/', $contact["orgName"], $aptNo)) {
+//            $row['KontaktLghNr'] = [$aptNo[0]];
+//        }
+        if (preg_match('/[CKT][a-z]*\s+\d{1,2}/', $contact["orgName"], $addr)) {
+            $row['KontaktGata'] = [$addr[0]];
+        }
+        $row['KontaktTilltrade'] = [$contact["aptAccessFrom"]];
+//        $row['KontaktForetag'] = [$contact["orgName"]];
+//        $row['KontaktTitel'] = [$contact["orgTitle"]];
         $row['KontaktNamn'] = [$contact["name"]];
         $row['KontaktEpost'] = [sprintf('<a href="mailto:%s">%s</a>', $contact["email"], $contact["email"])];
         $row['KontaktTelefon'] = [$contact["phone"]];
