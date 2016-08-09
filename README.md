@@ -16,6 +16,19 @@ gemensamma Google-konto.
 
 I bakgrunden används en styrelsemedlems Entré-konto för att logga in i Entré och hämta rapporterna.
 
+För att kunna se rapporterna måste man logga in med ett Google-konoto och detta fyller två syften:
+1. Det säkerställer att bara de som kan lösenordet till brf.trollkarlen2@gmail.com kan se informationen.
+1. Det gör det möjligt att komplettera informationen som hämtas från Entré med information från Google Contacts.
+
+För att den här PHP-sidan ska kunna anropa Google så har sidan registrerats som ett projekt hos Google. Du hittar
+projektet på https://console.developers.google.com/apis/dashboard?project=brftrollkarlen2-web-tools. Kom ihåg att du
+måste logga in som brf.trollkarlen2@gmail.com.
+
+Via console-sidan så hittar man det "OAuth 2.0 client ID" som PHP-sidan använder för att prata med Google. Namnet på
+PHP-sidan, såsom det är uppsatt hos Google, är "Dokumentgeneratorn" (vilket numera är något missvisande). Kikar man
+närmare på installningarna för "Dokumentgeneratorn" så ser man den "client secret" som också återfinns i
+client_secret_...apps.googleusercontent.com.json på webbservern.
+
 Kända problem:
 * Efter ett tag blir man utloggad från Google men det visas inget felmeddelande. Det enda som händer är att rapporterna
 inte visas. Testa att klicka på "Logga ut och logga in" och försök igen.
@@ -24,7 +37,7 @@ inte visas. Testa att klicka på "Logga ut och logga in" och försök igen.
 
 Används för externa PHP-bibliotek. I dagsläget det om följande:
 * Google API Client för att komma åt föreningens dokument på Google Drive från de här verktygen.
-* En PDF-läsare (som inte längre används eftersom den inte klarade av alla de Crystan Reports-PDF:er som vi kan få från Fastighetsägarna).
+* En PDF-läsare (som inte längre används eftersom den inte klarade av alla de Crystal Reports-PDF:er som vi kan få från Fastighetsägarna).
 
 ## tillsynsrapporter
 

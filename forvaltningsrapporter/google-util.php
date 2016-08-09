@@ -16,6 +16,7 @@ function createGoogleClient()
     $client->setRedirectUri(GOOGLE_OAUTHCALLBACK_URI);
 //    $client->addScope(Google_Service_Drive::DRIVE_METADATA);
     $client->addScope(Google_Service_Drive::DRIVE);
+    $client->addScope(Google_Service_Plus::USERINFO_EMAIL);
     $client->addScope("http://www.google.com/m8/feeds/");
     return $client;
 }
