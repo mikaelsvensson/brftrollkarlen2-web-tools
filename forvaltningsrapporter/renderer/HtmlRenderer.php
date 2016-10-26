@@ -30,7 +30,6 @@ class HtmlRenderer
         tr.entry:hover { background-color: #ddd; }
         </style>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
-        <script src="template-links.js?$time"></script>
         </head>
         <body>
 HTML_START;

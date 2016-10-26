@@ -1,4 +1,5 @@
 <?php
+require_once 'config.php';
 
 class ReportReader
 {
@@ -9,8 +10,9 @@ class ReportReader
         };
     }
 
-    function getReportObjects($cfg, $xml)
+    function getReportObjects($cfg, $xml, $contacts = [])
     {
+        global $REPORTS;
         $apts = array();
         $field = 'ExtraInformation';
         $i = 0;
@@ -101,6 +103,32 @@ class ReportReader
         }
 
         $apts = array_filter($apts, $this->create_filter_function($skipAptIfHeaderExists));
+
+        $title = "" . $reader['id'];
+        $reportCfg = $REPORTS[$title];
+        // Configuration specifies columns in array. Filtering function should use array values as keys.
+        $columns = array_fill_keys($reportCfg['columns'], null);
+        $joiner = isset($reportCfg['columns']) ? $this->create_column_filter_function($columns) : null;
+
+        if (isset($reportCfg['rowprocessor'])) {
+            $rowprocessor = $reportCfg['rowprocessor'];
+            $fn = function ($apt) use ($contacts, $rowprocessor) {
+                return $rowprocessor($apt, $contacts);
+            };
+            $apts = array_map($fn, $apts);
+        }
+        if (isset($joiner)) {
+            $apts = array_map($joiner, $apts);
+        }
+
         return $apts;
     }
+
+    function create_column_filter_function($columns)
+    {
+        return function ($obj) use ($columns) {
+            return array_intersect_key($obj, $columns);
+        };
+    }
+
 }
