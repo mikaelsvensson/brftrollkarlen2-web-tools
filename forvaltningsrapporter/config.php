@@ -214,7 +214,28 @@ $REPORTS = [
                 }
                 return array_values($res);
             }
-        ]
+        ],
+    'huvudbok' => [
+        'rowprocessor' => function ($row, $contacts) {
+            static $lastAcc = null;
+            static $lastAccName = null;
+            if (!is_array($row['Konto']) && is_array($row['Verifikatid'])) {
+                $row['Konto'] = $lastAcc;
+                $row['Kontonamn'] = $lastAccName;
+            }
+            $lastAcc = $row['Konto'];
+            $lastAccName = $row['Kontonamn'];
+
+            $extraInformation = $row['ExtraInformation'][0];
+            $slashPos = strrpos($extraInformation, '/');
+            if ($slashPos !== false) {
+                $row['Motpart'] = [substr($extraInformation, 0, $slashPos)];
+                $row['MotpartId'] = [substr($extraInformation, $slashPos+1)];
+            }
+
+            return $row;
+        }
+    ]
 ];
 
 ?>
