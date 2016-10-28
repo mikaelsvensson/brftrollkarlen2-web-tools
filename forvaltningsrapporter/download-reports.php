@@ -1,4 +1,5 @@
 <?php
+const COOKIE_HEADER_START = "Set-Cookie: ";
 require_once 'renderer/HtmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'config.php';
@@ -11,38 +12,40 @@ function getAuthCookie()
 {
     global $cookie;
     if (!isset($cookie)) {
+        $ch = curl_init('https://entre.stofast.se/');
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $c = curl_exec($ch);
+        curl_close($ch);
+
+        $match = [];
+        preg_match('/[0-9A-F]{16}/', $c, $match);
+        $ModDate = $match[0];
+
         $params = array(
-            "%%ModDate" => time(),
+            "%%ModDate" => $ModDate,
             "RedirectTo" => "/ts/gosud.nsf/redirect_login?openagent",
             "Username" => STOFAST_USERNAME,
             "Password" => STOFAST_PASSWORD
         );
-        $postData = "";
-        foreach ($params as $k => $v) {
-            $postData .= $k . '=' . $v . '&';
-        }
-        $postData = rtrim($postData, '&');
 
         $ch = curl_init('https://entre.stofast.se/names.nsf?Login');
         curl_setopt($ch, CURLOPT_HEADER, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, count($postData));
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
         $c = curl_exec($ch);
-
         curl_close($ch);
 
-        list($headersRaw, $body) = explode("\r\n\r\n", $c, 2);
+        $pos = strpos($c, COOKIE_HEADER_START);
+        $cookieValuePos = $pos + strlen(COOKIE_HEADER_START);
+        $setCookieHeader = substr($c, $cookieValuePos, strpos($c, ";", $cookieValuePos) - $cookieValuePos);
 
-        $headers = array();
-        foreach (explode("\n", $headersRaw) as $line) {
-            list($name, $value) = explode(":", $line);
-            $headers[trim($name)] = trim($value);
+        if (empty($setCookieHeader)) {
+            die("Empty cookie");
         }
 
-        $setCookieHeader = $headers['Set-Cookie'];
-        $cookie = "Userid=" . USERNAME . "," . strtok($setCookieHeader, ";");
+        $cookie = "Userid=" . STOFAST_USERNAME . ";" . strtok($setCookieHeader, ";");
     }
     return $cookie;
 }
@@ -50,11 +53,12 @@ function getAuthCookie()
 $timestamp = date('Ymd');
 $downloadReportsToday = in_array(substr($timestamp, -2), REPORT_DAYS);
 if ($downloadReportsToday) {
-    $renderer = new HtmlRenderer();
-    $rendererCfg = simplexml_load_file("ReportReaderConfig.xml");
     mkdir(FILES_FOLDER, 0700, true);
     foreach ($REPORTS as $title => $reportCfg) {
         $url = $reportCfg['url'];
+        if (empty($url)) {
+            continue;
+        }
         $filename = FILES_FOLDER . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);
         if (!$isReportDownloaded) {
