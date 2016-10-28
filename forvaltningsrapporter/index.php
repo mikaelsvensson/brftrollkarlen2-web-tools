@@ -49,7 +49,7 @@ function printReportsMenu($selectedReportId)
     try {
         $contacts = getGoogleContacts($client);
     } catch (Exception $e) {
-        printf('<p>%s</p><p>Ofta hjälper det att <a href="auth-signout.php">logga in igen</a>.</p>', $e->getMessage());
+        printf('<p>%s</p><p>Ofta hj&auml;per det att <a href="auth-signout.php">logga in igen</a>.</p>', $e->getMessage());
         echo '</div></body></html>';
         exit();
     }
