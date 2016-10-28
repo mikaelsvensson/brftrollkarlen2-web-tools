@@ -99,14 +99,19 @@ $REPORTS = [
             },
             'summarygenerator' => function ($data) {
                 $res = [];
+                $sum = 0.0;
                 foreach ($data as $row) {
                     $debtee = $row['Hyresgast'][0];
-                    $amount = intval($row['Restbelopp'][0]);
+                    $amount = intval(preg_replace('/\D/', '', $row['Restbelopp'][0]));
 
                     $res[$debtee]['Hyresgast'][0] = $debtee;
                     $res[$debtee]['TotalRestbelopp'][0] += $amount;
                     $res[$debtee]['AntalRestbelopp'][0]++;
+                    $sum += $amount;
                 }
+                $res["sum"]['Hyresgast'][0] = "SUMMA";
+                $res["sum"]['TotalRestbelopp'][0] = $sum;
+                $res["sum"]['AntalRestbelopp'][0] = count($data);
                 return array_values($res);
             }
         ],
