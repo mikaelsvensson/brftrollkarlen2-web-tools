@@ -47,7 +47,7 @@
                         data[paramName] = paramValue;
                     }
 
-                    paramContainer.text(JSON.stringify(data));
+                    paramContainer.text(JSON.stringify(data, null, '    '));
 
                     toggleDialog();
                 }).append($("<img />").attr("src","application-small-list-blue.png").addClass("glyphicon glyphicon-duplicate")));
