@@ -16,6 +16,7 @@ class HtmlRenderer
         <style>
         body {
         font-family: sans-serif;
+        font-size: 90%;
         }
         td { border: 1px solid #555; }
         td, th { text-align: left; padding: 0.2em; vertical-align: top;}
