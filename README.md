@@ -17,7 +17,7 @@ gemensamma Google-konto.
 I bakgrunden används en styrelsemedlems Entré-konto för att logga in i Entré och hämta rapporterna.
 
 För att kunna se rapporterna måste man logga in med ett Google-konoto och detta fyller två syften:
-1. Det säkerställer att bara de som kan lösenordet till brf.trollkarlen2@gmail.com kan se informationen.
+1. Det säkerställer att bara de som kan lösenordet till föreningens e-postkonto kan se informationen.
 1. Det gör det möjligt att komplettera informationen som hämtas från Entré med information från Google Contacts.
 
 För att den här PHP-sidan ska kunna anropa Google så har sidan registrerats som ett projekt hos Google. Du hittar

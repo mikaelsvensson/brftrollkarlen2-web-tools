@@ -9,9 +9,9 @@ $isAccessTokenSet = isset($_SESSION['access_token']) && $_SESSION['access_token'
 if (!$isAccessTokenSet) {
     header('Location: ' . filter_var(GOOGLE_OAUTHCALLBACK_URI, FILTER_SANITIZE_URL));
 }
-const AUTHORIZED_USER_EMAIL = 'brf.trollkarlen2@gmail.com';
-if ($_SESSION['email'] != AUTHORIZED_USER_EMAIL) {
-    die("Only the ".AUTHORIZED_USER_EMAIL." may access this page.");
+const AUTHORIZED_USER = 'brf.trollkarlen2'.'@'.'g'.'mail.com';
+if ($_SESSION['email'] != AUTHORIZED_USER) {
+    die("Only the ".AUTHORIZED_USER." may access this page.");
 };
 
 $reportId = $_GET['report'];
