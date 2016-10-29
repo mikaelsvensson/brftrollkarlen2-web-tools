@@ -12,47 +12,74 @@ function getAuthCookie()
 {
     global $cookie;
     if (!isset($cookie)) {
-        $ch = curl_init('https://entre.stofast.se/');
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $c = curl_exec($ch);
-        curl_close($ch);
+        $ModDate = getModDate();
 
-        $match = [];
-        preg_match('/[0-9A-F]{16}/', $c, $match);
-        $ModDate = $match[0];
+        $cookieHeader = getAuthCookieHeader($ModDate);
 
-        $params = array(
-            "%%ModDate" => $ModDate,
-            "RedirectTo" => "/ts/gosud.nsf/redirect_login?openagent",
-            "Username" => STOFAST_USERNAME,
-            "Password" => STOFAST_PASSWORD
-        );
-
-        $ch = curl_init('https://entre.stofast.se/names.nsf?Login');
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-        $c = curl_exec($ch);
-        curl_close($ch);
-
-        $pos = strpos($c, COOKIE_HEADER_START);
-        $cookieValuePos = $pos + strlen(COOKIE_HEADER_START);
-        $setCookieHeader = substr($c, $cookieValuePos, strpos($c, ";", $cookieValuePos) - $cookieValuePos);
-
-        if (empty($setCookieHeader)) {
-            die("Empty cookie");
-        }
-
-        $cookie = "Userid=" . STOFAST_USERNAME . ";" . strtok($setCookieHeader, ";");
+        $cookie = "Userid=" . STOFAST_USERNAME . ";" . strtok($cookieHeader, ";");
     }
     return $cookie;
 }
 
+function getAuthCookieHeader($ModDate)
+{
+    $params = array(
+        "%%ModDate" => $ModDate,
+        "RedirectTo" => "/ts/gosud.nsf/redirect_login?openagent",
+        "Username" => STOFAST_USERNAME,
+        "Password" => STOFAST_PASSWORD
+    );
+
+    $ch = curl_init('https://entre.stofast.se/names.nsf?Login');
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+    $c = curl_exec($ch);
+    curl_close($ch);
+
+    $pos = strpos($c, COOKIE_HEADER_START);
+    $cookieValuePos = $pos + strlen(COOKIE_HEADER_START);
+    $setCookieHeader = substr($c, $cookieValuePos, strpos($c, ";", $cookieValuePos) - $cookieValuePos);
+
+    if (empty($setCookieHeader)) {
+        die("Empty cookie");
+    }
+    return $setCookieHeader;
+}
+
+function getModDate()
+{
+    $ch1 = curl_init('https://entre.stofast.se/');
+    curl_setopt($ch1, CURLOPT_HEADER, true);
+    curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
+    $c1 = curl_exec($ch1);
+    curl_close($ch1);
+
+    $match = [];
+    preg_match('/[0-9A-F]{16}/', $c1, $match);
+    $ModDate = $match[0];
+    return $ModDate;
+}
+
+function downloadFileFromUrl($filename, $url)
+{
+    $fp = fopen($filename, 'wb');
+    $handle = curl_init($url);
+    curl_setopt($handle, CURLOPT_HTTPHEADER, array("Cookie: " . getAuthCookie()));
+    curl_setopt($handle, CURLOPT_FILE, $fp);
+    curl_setopt($handle, CURLOPT_HEADER, false);
+    curl_exec($handle);
+    print_r(curl_getinfo($handle));
+    curl_close($handle);
+    fclose($fp);
+}
+
 $timestamp = date('Ymd');
+$force = "true" == $_GET["force"];
 $downloadReportsToday = in_array(substr($timestamp, -2), REPORT_DAYS);
-if ($downloadReportsToday) {
+
+if ($force || $downloadReportsToday) {
     mkdir(FILES_FOLDER, 0700, true);
     foreach ($REPORTS as $title => $reportCfg) {
         $url = $reportCfg['url'];
@@ -61,16 +88,8 @@ if ($downloadReportsToday) {
         }
         $filename = FILES_FOLDER . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);
-        if (!$isReportDownloaded) {
-            $fp = fopen($filename, 'wb');
-            $handle = curl_init($url);
-            curl_setopt($handle, CURLOPT_HTTPHEADER, array("Cookie: " . getAuthCookie()));
-            curl_setopt($handle, CURLOPT_FILE, $fp);
-            curl_setopt($handle, CURLOPT_HEADER, false);
-            curl_exec($handle);
-            print_r(curl_getinfo($handle));
-            curl_close($handle);
-            fclose($fp);
+        if ($force || !$isReportDownloaded) {
+            downloadFileFromUrl($filename, $url);
         }
     }
     echo "Done";
