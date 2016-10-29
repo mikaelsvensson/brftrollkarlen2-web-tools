@@ -32,8 +32,6 @@ function printReport($title, $contacts)
 
     $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
     $renderer = new BootstrapHtmlRenderer();
-    $rendererCfg = simplexml_load_file("ReportReaderConfig.xml");
-
     $reportCfg = $REPORTS[$title];
 
     // Configuration specifies columns in array. Filtering function should use array values as keys.
@@ -55,8 +53,8 @@ function printReport($title, $contacts)
 
             $xml = simplexml_load_string($content);
 
-            $reader = new ReportReader();
-            $apts = $reader->getReportObjects($rendererCfg, $xml);
+            $reader = new ReportReader("config-reportreader.xml");
+            $apts = $reader->getReportObjects($xml);
 
             if (isset($reportCfg['rowprocessor'])) {
                 $rowprocessor = $reportCfg['rowprocessor'];

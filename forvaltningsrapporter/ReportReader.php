@@ -3,6 +3,16 @@ require_once 'config.php';
 
 class ReportReader
 {
+
+    /**
+     * ReportReader constructor.
+     * @param $configFilePath
+     */
+    public function __construct($configFilePath)
+    {
+        $this->cfg = simplexml_load_file($configFilePath);
+    }
+
     function create_filter_function($skipAptHeaders)
     {
         return function ($apt) use ($skipAptHeaders) {
@@ -10,9 +20,12 @@ class ReportReader
         };
     }
 
-    function getReportObjects($cfg, $xml, $contacts = [])
+    function getReportObjects($xml, $contacts = [])
     {
         global $REPORTS;
+
+        $cfg = $this->cfg;
+
         $apts = array();
         $field = 'ExtraInformation';
         $i = 0;

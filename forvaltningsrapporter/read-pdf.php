@@ -28,10 +28,8 @@ if ($_POST['renderer']) {
     $renderer = new $className;
     if ($renderer) {
         $xml = simplexml_load_string($content);
-        $cfg = simplexml_load_file("ReportReaderConfig.xml");
-
-        $reader = new ReportReader();
-        $apts = $reader->getReportObjects($cfg, $xml);
+        $reader = new ReportReader("config-reportreader.xml");
+        $apts = $reader->getReportObjects($xml);
         if (!isset($apts)) {
             die("Hittar ingen beskrivning f?r hur filen ska l?sas.");
         }
