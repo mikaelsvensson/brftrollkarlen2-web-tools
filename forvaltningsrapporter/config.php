@@ -1,4 +1,9 @@
 <?php
+require_once 'config/BaseRule.php';
+require_once 'config/PositionRule.php';
+require_once 'config/Reader.php';
+require_once 'config/TextRule.php';
+
 const FILES_FOLDER = './reports-archive/';
 
 const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
@@ -19,10 +24,10 @@ function getGoogleContacts($client)
     $response = json_decode($responseRaw, true)['feed']['entry'];
 
     $contacts = array_map(function ($contact) {
-        $aptAccessFromDateProps = array_filter($contact['gContact$userDefinedField'],
+        $aptAccessFromDateProps = is_array($contact['gContact$userDefinedField']) ? array_filter($contact['gContact$userDefinedField'],
             function ($item) {
                 return strpos($item['key'], 'Tilltr') != -1;
-            });
+            }) : [];
         return [
             'name' => isset($contact['title']) ? $contact['title']['$t'] : null,
             'updated' => $contact['updated']['$t'],
@@ -235,7 +240,7 @@ $REPORTS = [
             $slashPos = strrpos($extraInformation, '/');
             if ($slashPos !== false) {
                 $row['Motpart'] = [substr($extraInformation, 0, $slashPos)];
-                $row['MotpartId'] = [substr($extraInformation, $slashPos+1)];
+                $row['MotpartId'] = [substr($extraInformation, $slashPos + 1)];
             }
 
             return $row;
@@ -256,7 +261,13 @@ $REPORTS = [
             $slashPos = strrpos($extraInformation, '/');
             if ($slashPos !== false) {
                 $row['Motpart'] = [substr($extraInformation, 0, $slashPos)];
-                $row['MotpartId'] = [substr($extraInformation, $slashPos+1)];
+                $row['MotpartId'] = [substr($extraInformation, $slashPos + 1)];
+            }
+
+            foreach (['Kredit', 'Debet', 'Radsumma', 'BalansIn', 'SaldoIn'] as $columnName) {
+                $row[$columnName] = array_map(function ($value) {
+                    return str_replace(' ', '', $value);
+                }, $row[$columnName]);
             }
 
             return $row;

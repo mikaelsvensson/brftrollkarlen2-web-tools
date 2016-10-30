@@ -11,10 +11,7 @@ require_once 'renderer/XmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'PdfParserWrapper.php';
 
-//if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-//    readfile('index-custom-report-form.html');
-//    exit;
-//}
+require_once 'config-reportreader.php';
 
 $filename = $_FILES['userfile']['tmp_name'];
 if (!file_exists($filename)) {
@@ -28,10 +25,10 @@ if ($_POST['renderer']) {
     $renderer = new $className;
     if ($renderer) {
         $xml = simplexml_load_string($content);
-        $reader = new ReportReader("config-reportreader.xml");
+        $reader = new ReportReader($configReportReader);
         $apts = $reader->getReportObjects($xml);
         if (!isset($apts)) {
-            die("Hittar ingen beskrivning f?r hur filen ska l?sas.");
+            die("Hittar ingen beskrivning f&ouml;r hur filen ska l&auml;sas.");
         }
 
         $renderer->writerDocStart();

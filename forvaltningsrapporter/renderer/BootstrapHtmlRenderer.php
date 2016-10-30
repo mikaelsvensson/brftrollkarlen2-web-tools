@@ -35,8 +35,10 @@ HTML_START;
 HTML_START;
         foreach ($apts as $apt) {
             foreach ($headers as $header) {
-                $value = join(',', $apt[$header]);
-                $stats[$header][$value]++;
+                if (is_array($apt[$header])) {
+                    $value = join(',', $apt[$header]);
+                    $stats[$header][$value]++;
+                }
             }
         }
 
@@ -66,7 +68,7 @@ HTML_START;
         foreach ($apts as $apt) {
             print '<tr class="entry">';
             foreach ($headers as $header) {
-                $value = join(',', $apt[$header]);
+                $value = is_array($apt[$header]) ? join(',', $apt[$header]) : '';
                 printf('<td class="%s">%s</td>', $header, $value);
             }
             print "</tr>";

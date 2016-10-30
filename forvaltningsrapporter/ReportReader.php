@@ -1,16 +1,15 @@
 <?php
+use Config\PositionRule;
+use Config\TextRule;
+
 require_once 'config.php';
 
 class ReportReader
 {
 
-    /**
-     * ReportReader constructor.
-     * @param $configFilePath
-     */
-    public function __construct($configFilePath)
+    public function __construct($reportReaders)
     {
-        $this->cfg = simplexml_load_file($configFilePath);
+        $this->reportReaders = $reportReaders;
     }
 
     function create_filter_function($skipAptHeaders)
@@ -24,15 +23,15 @@ class ReportReader
     {
         global $REPORTS;
 
-        $cfg = $this->cfg;
+//        $cfg = $this->cfg;
 
         $apts = array();
         $field = 'ExtraInformation';
         $i = 0;
 
         $reader = null;
-        foreach ($cfg->reader as $r) {
-            $res = $xml->xpath($r['xpathMatchPattern']);
+        foreach ($this->reportReaders as $r) {
+            $res = $xml->xpath($r->xpathMatchPattern);
             if ($res !== false && count($res) > 0) {
                 $reader = $r;
             }
@@ -40,8 +39,8 @@ class ReportReader
         if (!$reader) {
             return null;
         }
-        $skipAptIfHeaderExists = explode(' ', "" . $reader['skipEntriesWithColumn']);
-        $sortColumnsByPosition = 'true' == $reader['sortColumnsByPosition'];
+        $skipAptIfHeaderExists = $reader->skipEntriesWithColumn;
+        $sortColumnsByPosition = $reader->sortColumnsByPosition;
 
         $followingOutputColumns = [];
 
@@ -75,17 +74,19 @@ class ReportReader
                     case 'TJ':
                         $x = array_shift($followingOutputColumns);
                         if ($x == null || strlen(trim($x)) == 0) {
-                            foreach ($reader->textRule as $rule) {
-                                list($key, $pattern, $new) = array("" . $rule['outputColumn'], "" . $rule['pattern'], $rule['isGroupStart'] == 'true');
-                                if (preg_match("/$pattern/i", $value)) {
-                                    $field = $key;
-                                    if ($new) {
-                                        $i++;
+                            foreach ($reader->rules as $rule) {
+                                if ($rule instanceof TextRule) {
+                                    list($key, $pattern, $new) = array("" . $rule->outputColumn, "" . $rule->pattern, $rule->isGroupStart == 'true');
+                                    if (preg_match("/$pattern/i", $value)) {
+                                        $field = $key;
+                                        if ($new) {
+                                            $i++;
+                                        }
+                                        if ($rule->followingOutputColumns != null) {
+                                            $followingOutputColumns = $rule->followingOutputColumns;
+                                        }
+                                        break;
                                     }
-                                    if ($rule['followingOutputColumns'] != null) {
-                                        $followingOutputColumns = explode(' ', $rule['followingOutputColumns']);
-                                    }
-                                    break;
                                 }
                             }
                         } else {
@@ -97,17 +98,19 @@ class ReportReader
                     case 'Tm':
                         $commandAttr = (string)$cmd['cmd'];
                         $field = 'ExtraInformation';
-                        foreach ($reader->positionRule as $rule) {
-                            list($key, $pos, $posX, $posY, $new) = array("" . $rule['outputColumn'], "" . $rule['exactMatch'], "" . $rule['exactX'], "" . $rule['exactY'], $rule['isGroupStart'] == 'true');
-                            if ($commandAttr != '' && ($commandAttr == $pos || explode(' ', $commandAttr)[0] == $posX || explode(' ', $commandAttr)[1] == $posY)) {
-                                $field = $key;
-                                if ($new) {
-                                    $i++;
+                        foreach ($reader->rules as $rule) {
+                            if ($rule instanceof PositionRule) {
+                                list($key, $pos, $new) = array("" . $rule->outputColumn, "" . $rule->exactMatch, $rule->isGroupStart);
+                                if ($commandAttr != '' && $commandAttr == $pos) {
+                                    $field = $key;
+                                    if ($new) {
+                                        $i++;
+                                    }
+                                    if ($rule->followingOutputColumns != null) {
+                                        $followingOutputColumns = array_merge([$field], $rule->followingOutputColumns);
+                                    }
+                                    break;
                                 }
-                                if ($rule['followingOutputColumns'] != null) {
-                                    $followingOutputColumns = explode(' ', "$field " . $rule['followingOutputColumns']);
-                                }
-                                break;
                             }
                         }
                         break;
@@ -117,11 +120,9 @@ class ReportReader
 
         $apts = array_filter($apts, $this->create_filter_function($skipAptIfHeaderExists));
 
-        $title = "" . $reader['id'];
+        $title = "" . $reader->id;
         $reportCfg = $REPORTS[$title];
         // Configuration specifies columns in array. Filtering function should use array values as keys.
-        $columns = array_fill_keys($reportCfg['columns'], null);
-        $joiner = isset($reportCfg['columns']) ? $this->create_column_filter_function($columns) : null;
 
         if (isset($reportCfg['rowprocessor'])) {
             $rowprocessor = $reportCfg['rowprocessor'];
@@ -130,18 +131,14 @@ class ReportReader
             };
             $apts = array_map($fn, $apts);
         }
-        if (isset($joiner)) {
-            $apts = array_map($joiner, $apts);
+        if (isset($reportCfg['columns'])) {
+            $columns = array_fill_keys($reportCfg['columns'], null);
+            $apts = array_map(function ($obj) use ($columns) {
+                return array_intersect_key($obj, $columns);
+            }, $apts);
         }
 
         return $apts;
-    }
-
-    function create_column_filter_function($columns)
-    {
-        return function ($obj) use ($columns) {
-            return array_intersect_key($obj, $columns);
-        };
     }
 
 }

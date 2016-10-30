@@ -2,6 +2,7 @@
 // Include Composer autoloader if not already done.
 require_once '../vendor/autoload.php';
 require_once 'config.php';
+require_once 'config-reportreader.php';
 
 require_once 'renderer/BootstrapHtmlRenderer.php';
 require_once 'ReportReader.php';
@@ -23,7 +24,7 @@ function create_starts_with_function($prefix)
 
 function printReport($title, $contacts)
 {
-    global $REPORTS;
+    global $REPORTS, $configReportReader;
     $joinAll = function ($a, $b) {
         $compA = join(array_map("join", $a));
         $compB = join(array_map("join", $b));
@@ -33,11 +34,6 @@ function printReport($title, $contacts)
     $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
     $renderer = new BootstrapHtmlRenderer();
     $reportCfg = $REPORTS[$title];
-
-    // Configuration specifies columns in array. Filtering function should use array values as keys.
-    $columns = array_fill_keys($reportCfg['columns'], null);
-
-    $joiner = isset($reportCfg['columns']) ? create_column_filter_function($columns) : null;
 
     // Pick the 3 most recent PDF for current type of report
     $reportFiles = array_slice(array_filter($files, create_starts_with_function($title)), 0, 3);
@@ -53,7 +49,7 @@ function printReport($title, $contacts)
 
             $xml = simplexml_load_string($content);
 
-            $reader = new ReportReader("config-reportreader.xml");
+            $reader = new ReportReader($configReportReader);
             $apts = $reader->getReportObjects($xml);
 
             if (isset($reportCfg['rowprocessor'])) {
@@ -65,6 +61,9 @@ function printReport($title, $contacts)
             }
 
             if (isset($apts)) {
+                // Configuration specifies columns in array. Filtering function should use array values as keys.
+                $joiner = isset($reportCfg['columns']) ? create_column_filter_function(array_fill_keys($reportCfg['columns'], null)) : null;
+
                 if (isset($joiner)) {
                     $apts = array_map($joiner, $apts);
                 }
