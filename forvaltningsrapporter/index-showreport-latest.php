@@ -2,7 +2,6 @@
 // Include Composer autoloader if not already done.
 require_once '../vendor/autoload.php';
 require_once 'config.php';
-require_once 'config-reportreader.php';
 
 require_once 'renderer/BootstrapHtmlRenderer.php';
 require_once 'ReportReader.php';
@@ -24,7 +23,7 @@ function create_starts_with_function($prefix)
 
 function printReport($title, $contacts)
 {
-    global $REPORTS, $configReportReader;
+    global $REPORTS;
     $joinAll = function ($a, $b) {
         $compA = join(array_map("join", $a));
         $compB = join(array_map("join", $b));
@@ -49,7 +48,7 @@ function printReport($title, $contacts)
 
             $xml = simplexml_load_string($content);
 
-            $reader = new ReportReader($configReportReader);
+            $reader = new ReportReader([$reportCfg['reportreader']]);
             $apts = $reader->getReportObjects($xml);
 
             if (isset($reportCfg['rowprocessor'])) {

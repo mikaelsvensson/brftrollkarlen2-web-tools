@@ -11,7 +11,7 @@ require_once 'renderer/XmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'PdfParserWrapper.php';
 
-require_once 'config-reportreader.php';
+require_once 'config.php';
 
 $filename = $_FILES['userfile']['tmp_name'];
 if (!file_exists($filename)) {
@@ -25,7 +25,9 @@ if ($_POST['renderer']) {
     $renderer = new $className;
     if ($renderer) {
         $xml = simplexml_load_string($content);
-        $reader = new ReportReader($configReportReader);
+        $reader = new ReportReader(array_map(function ($cfg) {
+            return $cfg['reportreader'];
+        }, $REPORTS));
         $apts = $reader->getReportObjects($xml);
         if (!isset($apts)) {
             die("Hittar ingen beskrivning f&ouml;r hur filen ska l&auml;sas.");
