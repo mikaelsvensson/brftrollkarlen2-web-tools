@@ -50,7 +50,9 @@ HTML_START;
                 $stats[$header] = array_slice($stats[$header], 0, 9);
             }
             foreach ($stats[$header] as $value => $count) {
-                printf('<li><small>%s: %s</small></li>', $value, $count);
+                if ($count > 1 && !empty($value)) {
+                    printf('<li><small>%s: %s&nbsp;ggr</small></li>', $value, $count);
+                }
             }
             if ($slice) {
                 print '<li><small>...</small></li>';

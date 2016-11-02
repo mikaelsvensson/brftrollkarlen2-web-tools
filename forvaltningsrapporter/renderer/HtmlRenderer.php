@@ -26,7 +26,7 @@ class HtmlRenderer
         h2 { font-size: 1.5em; font-weight: normal; }
         h2 span{ font-size: 80%; color: #888; padding-left: 1em; font-style: italic; }
         div.diff { margin-left: 2em; font-size: 90% }
-        tr.popular td { font-size: 90%; color: #888 }
+        tr.popular td { font-size: 90%; color: #888; border: none }
         tr.popular ul { list-style-type: none; margin: 0; padding: 0}
         tr.entry:hover { background-color: #ddd; }
         </style>
@@ -79,7 +79,9 @@ HTML_START;
                 $stats[$header] = array_slice($stats[$header], 0, 9);
             }
             foreach ($stats[$header] as $value => $count) {
-                printf('<li>%s: %s</li>', $value, $count);
+                if ($count > 1 && !empty($value)) {
+                    printf('<li><small>%s: %s&nbsp;ggr</small></li>', $value, $count);
+                }
             }
             if ($slice) {
                 print '<li>...</li>';
