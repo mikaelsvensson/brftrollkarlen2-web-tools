@@ -25,16 +25,32 @@ if ($_POST['renderer']) {
     $renderer = new $className;
     if ($renderer) {
         $xml = simplexml_load_string($content);
-        $reader = new ReportReader(array_map(function ($cfg) {
-            return $cfg['reportreader'];
-        }, $REPORTS));
+
+        $reportCfg = null;
+        foreach ($REPORTS as $cfg) {
+            if ($cfg['reportreader']->accepts($xml)) {
+                $reportCfg = $cfg;
+            }
+        }
+        if (!$reportCfg) {
+            die("Hittar ingen beskrivning f&ouml;r hur filen ska l&auml;sas.");
+        }
+
+        $reader = new ReportReader($reportCfg['reportreader']);
         $apts = $reader->getReportObjects($xml);
         if (!isset($apts)) {
-            die("Hittar ingen beskrivning f&ouml;r hur filen ska l&auml;sas.");
+            die("Kunde inte skapa rapporter.");
         }
 
         $renderer->writerDocStart();
         $renderer->write($apts);
+
+        if (isset($reportCfg['summarygenerator'])) {
+            $rowprocessor = $reportCfg['summarygenerator'];
+            $summaryData = $rowprocessor($apts);
+            $renderer->write($summaryData);
+        }
+
         $renderer->writerDocEnd();
     } else {
         print "No renderer";

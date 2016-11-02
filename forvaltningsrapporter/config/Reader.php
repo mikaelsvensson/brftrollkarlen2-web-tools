@@ -19,4 +19,9 @@ class Reader
         $this->rules = $rules;
     }
 
+    public function accepts($xml)
+    {
+        $res = $xml->xpath($this->xpathMatchPattern);
+        return $res !== false && count($res) > 0;
+    }
 }

@@ -7,9 +7,9 @@ require_once 'config.php';
 class ReportReader
 {
 
-    public function __construct($reportReaders)
+    public function __construct($reportReader)
     {
-        $this->reportReaders = $reportReaders;
+        $this->reportReader = $reportReader;
     }
 
     function create_filter_function($skipAptHeaders)
@@ -29,16 +29,16 @@ class ReportReader
         $field = 'ExtraInformation';
         $i = 0;
 
-        $reader = null;
-        foreach ($this->reportReaders as $r) {
-            $res = $xml->xpath($r->xpathMatchPattern);
-            if ($res !== false && count($res) > 0) {
-                $reader = $r;
-            }
-        }
-        if (!$reader) {
-            return null;
-        }
+        $reader = $this->reportReader;
+//        foreach ($this->reportReaders as $r) {
+//            $res = $xml->xpath($r->xpathMatchPattern);
+//            if ($res !== false && count($res) > 0) {
+//                $reader = $r;
+//            }
+//        }
+//        if (!$reader) {
+//            return null;
+//        }
         $skipAptIfHeaderExists = $reader->skipEntriesWithColumn;
         $sortColumnsByPosition = $reader->sortColumnsByPosition;
 
@@ -76,7 +76,7 @@ class ReportReader
                         if ($x == null || strlen(trim($x)) == 0) {
                             foreach ($reader->rules as $rule) {
                                 if ($rule instanceof TextRule) {
-                                    list($key, $pattern, $new) = array("" . $rule->outputColumn, "" . $rule->pattern, $rule->isGroupStart == 'true');
+                                    list($key, $pattern, $new) = array("" . $rule->outputColumn, "" . $rule->pattern, $rule->isGroupStart);
                                     if (preg_match("/$pattern/i", $value)) {
                                         $field = $key;
                                         if ($new) {

@@ -305,18 +305,18 @@ $REPORTS = [
 
                 return $row;
             },
-            PROP_SUMMARY_GENERATOR => function ($data) {
-                $res = [];
-                foreach ($data as $row) {
-                    $aptNumber = intval($row['LghNr'][0]);
-                    if ($aptNumber < 1000) {
-                        $res[$row['AdressGata'][0]]['AdressGata'] = [$row['AdressGata'][0]];
-                        $floor = str_replace(' ', '', $row['AdressVaning'][0]);
-                        $res[$row['AdressGata'][0]]['Apt' . $floor . ($aptNumber % 2)] = [$row['Namn1'][0] . (!empty($row['Namn2'][0]) ? ', ' . $row['Namn2'][0] : '')];
-                    }
-                }
-                return array_values($res);
-            },
+//            PROP_SUMMARY_GENERATOR => function ($data) {
+//                $res = [];
+//                foreach ($data as $row) {
+//                    $aptNumber = intval($row['LghNr'][0]);
+//                    if ($aptNumber < 1000) {
+//                        $res[$row['AdressGata'][0]]['AdressGata'] = [$row['AdressGata'][0]];
+//                        $floor = str_replace(' ', '', $row['AdressVaning'][0]);
+//                        $res[$row['AdressGata'][0]]['Apt' . $floor . ($aptNumber % 2)] = [$row['Namn1'][0] . (!empty($row['Namn2'][0]) ? ', ' . $row['Namn2'][0] : '')];
+//                    }
+//                }
+//                return array_values($res);
+//            },
             PROP_REPORTREADER => new Reader("tenants", "/doc/row/Tj[text() = 'HYRESGÄSTFÖRTECKNING']", ["Header", "Footer"], false, [
                 new TextRule("Footer", "Copyright", true),
                 new TextRule("Header", "Användare", true),
@@ -477,6 +477,60 @@ $REPORTS = [
 
             new TextRule("Konto", '^\d{4}$', true, ["Kontonamn", "AccUtfall", "BudgetHelar", "Procent", "PeriodUtfall", "AccUtfallForegAr"]),
             new TextRule("Rubrik", '^summa', false, ["AccUtfall", "BudgetHelar", "Procent", "PeriodUtfall", "AccUtfallForegAr"])
+        ])
+    ],
+    'klientmedelskonto' => [
+        PROP_COLUMNS => ['Debet', 'Radsaldo', 'Kredit', 'Verifikatid', 'Radtext', 'BokfDatum', 'Motpart', 'MotpartId'],
+        PROP_ROWPROCESSOR => function ($row, $contacts) {
+            $extraInformation = $row['Radtext'][0];
+            $slashPos = strrpos($extraInformation, '/');
+            if ($slashPos !== false) {
+                $row['Motpart'] = [substr($extraInformation, 0, $slashPos)];
+                $row['MotpartId'] = [substr($extraInformation, $slashPos + 1)];
+            }
+
+            foreach (['Kredit', 'Debet', 'Radsaldo'] as $columnName) {
+                $row[$columnName] = array_map(function ($value) {
+                    return str_replace(' ', '', $value);
+                }, $row[$columnName]);
+            }
+
+            return $row;
+        },
+        PROP_SUMMARY_GENERATOR => function ($data) {
+            $res = [];
+            $sum = 0.0;
+            foreach ($data as $row) {
+                $debtee = $row['Motpart'][0];
+                if (!empty($debtee)) {
+                    $amount = intval(preg_replace('/\D/', '', $row['Kredit'][0]));
+
+                    $res[$debtee]['Motpart'][0] = $debtee;
+                    $res[$debtee]['TotalKredit'][0] += $amount;
+                    $res[$debtee]['AntalKredit'][0]++;
+                    $sum += $amount;
+                }
+            }
+            $res["sum"]['Motpart'][0] = "SUMMA";
+            $res["sum"]['TotalKredit'][0] = $sum;
+            $res["sum"]['AntalKredit'][0] = count($data);
+            return array_values($res);
+        },
+        PROP_REPORTREADER => new Reader("klientmedelskonto", "/doc/row/Tj[text() = 'Klientmedelskonto']", [], false, [
+
+//            new TextRule("PageStart", '^Resultat', false),
+//            new PositionRule("PageStart", "-40.35 -12"),
+//            new PositionRule("Rubrik", "0 -27.5"),
+//            new PositionRule("Rubrik", "-371.25 -13.75"),
+//            new TextRule("PageStart", '\d{4}-\d{2}-\d{2}', false),
+            new TextRule("Summering", 'ndring:', true),
+
+            new TextRule("PageStart", '^Sida', false),
+            new TextRule("PageStart", 'Incit Xpand', false),
+
+            new TextRule("Verifikatid", '^18916\w{2}\d{4}', true, ["Radtext", "BokfDatum"]),
+            new TextRule("Kredit", '^-\d[\s\d]*,\d{2}', false, ["Radsaldo"]),
+            new TextRule("Debet", '^\d[\s\d]*,\d{2}', false, ["Radsaldo"]),
         ])
     ]
 ];

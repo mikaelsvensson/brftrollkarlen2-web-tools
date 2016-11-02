@@ -48,7 +48,7 @@ function printReport($title, $contacts)
 
             $xml = simplexml_load_string($content);
 
-            $reader = new ReportReader([$reportCfg['reportreader']]);
+            $reader = new ReportReader($reportCfg['reportreader']);
             $apts = $reader->getReportObjects($xml);
 
             if (isset($reportCfg['rowprocessor'])) {
