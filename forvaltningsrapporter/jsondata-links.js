@@ -6,6 +6,11 @@
             $("#jsonForm").toggleClass("hidden");
         };
 
+        var toggleExportDialog = function () {
+            $(document.body).toggleClass("overlay-backdrop");
+            $("#exporterForm").toggleClass("hidden");
+        };
+
         var copyJson = function() {
             var copyTextarea = document.querySelector('#jsonData');
             copyTextarea.select();
@@ -19,11 +24,19 @@
             }
         };
 
+        $("#exporterForm-button-close").click(toggleExportDialog);
+
         $("#jsonForm-button-close").click(toggleDialog);
         $("#jsonForm-button-copy").click(copyJson);
 
 
         $("table").each(function (i, table) {
+            var tableId = table.id;
+            $(table).before($('<button>').attr("type", "button").addClass("btn btn-default btn-xs").text("Export").click(function (e) {
+                $("#exporter-data").val($(document.getElementById(tableId + "-exporter-data")).val());
+                toggleExportDialog();
+            }));
+
             var headers = $(table).children("thead").children("tr").children("th").map(function (index, th) {
                 return $(th).text();
             });

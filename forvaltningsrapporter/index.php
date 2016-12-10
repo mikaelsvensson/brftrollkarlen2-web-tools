@@ -88,6 +88,7 @@ function printReportsMenu($selectedReportId)
     ?>
 </div>
 <?php include("index-generator-form.php") ?>
+<?php include("index-export-form.php") ?>
 <?php include("index-json-form.php") ?>
 </body>
 </html>

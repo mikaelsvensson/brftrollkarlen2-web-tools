@@ -10,8 +10,10 @@ class BootstrapHtmlRenderer
 
     function write($apts)
     {
+        $id = uniqid();
+        $exportData = [];
         print <<< HTML_START
-        <table class="table table-striped table-hover table-condensed">
+        <table class="table table-striped table-hover table-condensed" id="table-$id">
         <thead>
         <tr>
 HTML_START;
@@ -23,9 +25,12 @@ HTML_START;
         $headers = array_unique($headers);
 
         $stats = [];
+        $exportRow = [];
         foreach ($headers as $header) {
+            $exportRow[] = $header;
             print "<th>$header</th>";
         }
+        $exportData[] = $exportRow;
 
         print <<< HTML_START
         </tr>
@@ -66,20 +71,23 @@ HTML_START;
         <tbody>
 HTML_START;
 
-
         foreach ($apts as $apt) {
+            $exportRow = [];
             print '<tr class="entry">';
             foreach ($headers as $header) {
                 $value = is_array($apt[$header]) ? join(',', $apt[$header]) : '';
                 printf('<td class="%s">%s</td>', $header, $value);
+                $exportRow[] = strip_tags($value);
             }
             print "</tr>";
+            $exportData[] = $exportRow;
         }
 
         print <<< HTML_END
         </tbody>
         </table>
 HTML_END;
+        printf('<input type="hidden" id="table-%s-exporter-data" value="%s" name="exporter-data">', $id, base64_encode(serialize($exportData)));
     }
 
     function writerDocEnd()
