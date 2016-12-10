@@ -503,7 +503,7 @@ $REPORTS = [
             foreach ($data as $row) {
                 $debtee = $row['Motpart'][0];
                 if (!empty($debtee)) {
-                    $amount = intval(preg_replace('/\D/', '', $row['Kredit'][0]));
+                    $amount = 1.0 * intval(preg_replace('/\D/', '', $row['Kredit'][0])) / 100;
 
                     $res[$debtee]['Motpart'][0] = $debtee;
                     $res[$debtee]['TotalKredit'][0] += $amount;
@@ -516,7 +516,7 @@ $REPORTS = [
             $res["sum"]['AntalKredit'][0] = count($data);
             return array_values($res);
         },
-        PROP_REPORTREADER => new Reader("klientmedelskonto", "/doc/row/Tj[text() = 'Klientmedelskonto']", [], false, [
+        PROP_REPORTREADER => new Reader("klientmedelskonto", "/doc/row/Tj[text() = 'EF - Klientmedelskonto']", [], false, [
 
 //            new TextRule("PageStart", '^Resultat', false),
 //            new PositionRule("PageStart", "-40.35 -12"),
