@@ -279,7 +279,7 @@ $REPORTS = [
 
                 $aptYearlyFeeShare = doubleval(str_replace(',', '.', $row['AndelArsavgiftLgh'][0]));
                 $tenantShare = doubleval(str_replace(',', '.', $row['AndelAvLgh'][0]));
-                $row['AndelArsavgiftPerson'] = [number_format($aptYearlyFeeShare*($tenantShare/100), 5, ',', '')];
+                $row['AndelArsavgiftPerson'] = [number_format($aptYearlyFeeShare * ($tenantShare / 100), 5, ',', '')];
 
                 return $row;
             },
@@ -461,6 +461,12 @@ $REPORTS = [
         ])
     ],
     'apartments' => [
+        PROP_ROWPROCESSOR => function ($row, $contacts) {
+            $row['Insats'] = [preg_replace('/\D/', '', $row['Insats'][0])];
+            $row['UpplatelseAvgift'] = [preg_replace('/\D/', '', $row['UpplatelseAvgift'][0])];
+            return $row;
+        },
+        PROP_COLUMNS => ['LghData','Area','ProcentArsavgift','UpplatelseAvgift','Insats','AdressPostnr','AdressGata','Objekt','Vaning'],
         PROP_REPORTREADER => new Reader("apartments", "/doc/row/Tj[text() = 'LÄGENHETSFÖRTECKNING']", ["PageStart"], false, [
 
             new PositionRule("PageStart", "1454 -1422", true),
@@ -469,6 +475,7 @@ $REPORTS = [
 
             new TextRule("Objekt", '^18916-'),
             new PositionRule("AdressGata", "-5051 -2"),
+            new PositionRule("Objekt", "-1710"),
 
             new TextRule("Vaning", 'tr$'),
             new TextRule("Vaning", 'NB'),
