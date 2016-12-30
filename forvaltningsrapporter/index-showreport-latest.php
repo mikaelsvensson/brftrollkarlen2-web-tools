@@ -74,7 +74,8 @@ function printReport($title, $contacts)
     }
     $reportFiles = array_keys($reportsData);
     foreach ($reportFiles as $i => $file) {
-        printf('<h3>%s <small>%s</small></h3>',
+        printf('<h3><a href="arkiv/%s" target="_blank">%s</a> <small>%s</small></h3>',
+            $file,
             substr(substr($file, 0, -4), strlen($title) + 1),
             $i == 0 ? "Nul&auml;ge" : "Enbart skillnader");
 

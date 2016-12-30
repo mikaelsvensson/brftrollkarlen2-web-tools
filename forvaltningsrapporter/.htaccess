@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^arkiv/([a-z0-9.-]+)$   get-pdf.php?file=$1 [L]
