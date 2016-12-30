@@ -262,13 +262,25 @@ $REPORTS = [
             PROP_URL => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/C99AFBE828B40038C12579F900117247/$File/48775_1004.pdf?openElement',
             PROP_ROWPROCESSOR => function ($row) {
                 static $last = null;
-                if (!is_array($row['Objekt'])) {
+                if (empty($row['Objekt'])) {
                     $row['Objekt'] = $last;
+                } else {
+                    $row['Objekt'] = [substr($row['Objekt'][0], 7)];
                 }
-                $row['Objekt'] = [substr($row['Objekt'][0], 6)];
                 $last = $row['Objekt'];
 
+                static $lastAndelArsavgiftLgh = null;
+                if (empty($row['AndelArsavgiftLgh'])) {
+                    $row['AndelArsavgiftLgh'] = $lastAndelArsavgiftLgh;
+                }
+                $lastAndelArsavgiftLgh = $row['AndelArsavgiftLgh'];
+
                 $row['Personnr'] = [substr($row['Personnr'][0], 0, 6) . "-****"];
+
+                $aptYearlyFeeShare = doubleval(str_replace(',', '.', $row['AndelArsavgiftLgh'][0]));
+                $tenantShare = doubleval(str_replace(',', '.', $row['AndelAvLgh'][0]));
+                $row['AndelArsavgiftPerson'] = [number_format($aptYearlyFeeShare*($tenantShare/100), 5, ',', '')];
+
                 return $row;
             },
             PROP_REPORTREADER => new Reader("shares", "/doc/row/Tj[text() = 'Andelstal']", ["Header", "Footer"], false, [
@@ -281,16 +293,17 @@ $REPORTS = [
                 new TextRule("Objekt", '^18916-', true, ["Namn", "Personnr"]),
                 new PositionRule("Namn", '-13849 -303', true, ["Personnr"]),
                 new PositionRule("Namn", '-4051 -303', true, ["Personnr"]),
-                new PositionRule("Andel", "1531 0"),
-                new PositionRule("AndelArsavgift", "3542 0"),
-                new PositionRule("AndelFormogenhet", "-1726 0"),
+                new PositionRule("AndelAvLgh", "1531 0"),
+                new PositionRule("AndelArsavgiftLgh", "1816 0"),
+                new PositionRule("AndelArsavgiftLgh", "3542 0"),
+                new PositionRule("AndelFormogenhetLgh", "-1726 0"),
 
-                new PositionRule("Andel", "1453 0"),
-                new PositionRule("AndelArsavgift", "3620 0"),
+                new PositionRule("AndelAvLgh", "1453 0"),
+                new PositionRule("AndelArsavgiftLgh", "3620 0"),
 
-                new PositionRule("AndelArsavgift", "1894 0"),
+                new PositionRule("AndelArsavgiftLgh", "1894 0"),
 
-                new PositionRule("Area", "7982 0")
+                new PositionRule("AreaLgh", "7982 0")
             ])
         ],
     'objektsforteckning-hyresgastforteckning' =>
