@@ -536,7 +536,7 @@ $REPORTS = [
             $res["sum"]['AntalKredit'][0] = count($data);
             return array_values($res);
         },
-        PROP_REPORTREADER => new Reader("klientmedelskonto", "/doc/row/Tj[text() = 'EF - Klientmedelskonto']", [], false, [
+        PROP_REPORTREADER => new Reader("klientmedelskonto", "/doc/row/Tj[text() = 'EF - Klientmedelskonto']", ["PageStart"], false, [
 
 //            new TextRule("PageStart", '^Resultat', false),
 //            new PositionRule("PageStart", "-40.35 -12"),
@@ -548,9 +548,12 @@ $REPORTS = [
             new TextRule("PageStart", '^Sida', false),
             new TextRule("PageStart", 'Incit Xpand', false),
 
-            new TextRule("Verifikatid", '^18916\w{2}\d{4}', true, ["Radtext", "BokfDatum"]),
+            new TextRule("Verifikatid", '^18916\w{2}\d{4}', true),
+            new TextRule("BokfDatum", '^\d{4}-\d{2}-\d{2}$', false),
             new TextRule("Kredit", '^-\d[\s\d]*,\d{2}', false, ["Radsaldo"]),
             new TextRule("Debet", '^\d[\s\d]*,\d{2}', false, ["Radsaldo"]),
+            new TextRule("Radtext", '.', false),
+            new TextRule("PageStart", 'Incit Xpand', false)
         ])
     ]
 ];
