@@ -496,7 +496,7 @@ $REPORTS = [
             new TextRule("PageStart", 'Incit Xpand', false),
 
             new TextRule("Konto", '^\d{4}$', true, ["Kontonamn", "AccUtfall", "BudgetHelar", "Procent", "PeriodUtfall", "AccUtfallForegAr"]),
-            new TextRule("Rubrik", '^summa', false, ["AccUtfall", "BudgetHelar", "Procent", "PeriodUtfall", "AccUtfallForegAr"])
+            new TextRule("Rubrik", '(^summa|resultat)', false, ["AccUtfall", "BudgetHelar", "Procent", "PeriodUtfall", "AccUtfallForegAr"])
         ])
     ],
     'klientmedelskonto' => [
