@@ -21,6 +21,20 @@ const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
 
 $defaultParams = ['DATUM' => date('Ymd-His')];
 
+function fixFormattedCurrency(&$row, $columnNames)
+{
+    foreach ($columnNames as $columnName) {
+        if (is_array($row[$columnName])) {
+            $row[$columnName] = array_map("removeSpaces", $row[$columnName]);
+        }
+    }
+}
+
+function removeSpaces($value)
+{
+    return str_replace(' ', '', $value);
+}
+
 function getGoogleContacts($client)
 {
     $feedURL = "https://www.google.com/m8/feeds/contacts/default/thin?max-results=1000&alt=json";
@@ -315,9 +329,8 @@ $REPORTS = [
                 $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
 
                 if ($row['Belopp']) {
-                    $row['Belopp'] = array_unique(array_map(function ($value) {
-                        return str_replace(' ', '', $value);
-                    }, $row['Belopp']));
+                    fixFormattedCurrency($row, ['Belopp']);
+                    $row['Belopp'] = array_unique($row['Belopp']);
                 }
 
                 // Remove trailing marker for "Bostadsrätt"
@@ -373,7 +386,9 @@ $REPORTS = [
                 new TextRule("LghArea", '\d{1,2},0', false, ["ContractArea"]),
                 new PositionRule("LghData", "0 -240"),
                 new PositionRule("Belopp", "-802 -1166"),
+                new PositionRule("Belopp", "6452 0"),
                 new PositionRule("Belopp", "6374 0"),
+                new PositionRule("Belopp", "6374 240"),
                 new PositionRule("Avisering", "-12854 -720"),
                 new PositionRule("AdressGata", "0 -480"),
                 new PositionRule("AdressPost", "0 240"),
@@ -441,11 +456,7 @@ $REPORTS = [
                 $row['MotpartId'] = [substr($extraInformation, $slashPos + 1)];
             }
 
-            foreach (['Kredit', 'Debet', 'Radsumma', 'BalansIn', 'SaldoIn'] as $columnName) {
-                $row[$columnName] = array_map(function ($value) {
-                    return str_replace(' ', '', $value);
-                }, $row[$columnName]);
-            }
+            fixFormattedCurrency($row, ['Kredit', 'Debet', 'Radsumma', 'BalansIn', 'SaldoIn']);
 
             return $row;
         },
@@ -519,11 +530,7 @@ $REPORTS = [
                 $row['MotpartId'] = [substr($extraInformation, $slashPos + 1)];
             }
 
-            foreach (['Kredit', 'Debet', 'Radsaldo'] as $columnName) {
-                $row[$columnName] = array_map(function ($value) {
-                    return str_replace(' ', '', $value);
-                }, $row[$columnName]);
-            }
+            fixFormattedCurrency($row, ['Kredit', 'Debet', 'Radsaldo']);
 
             return $row;
         },
