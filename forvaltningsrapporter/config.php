@@ -309,10 +309,19 @@ $REPORTS = [
     'objektsforteckning-hyresgastforteckning' =>
         [
             PROP_TITLE => 'Objektsf&ouml;rteckning',
-            PROP_COLUMNS => ['LghNr', 'Objekt', 'Namn1', 'Namn2', 'AdressGata', 'AdressVaning', 'AdressPostnr', 'AdressPost', 'Typ', 'Datum', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon'],
+            PROP_COLUMNS => ['LghNr', 'Objekt', 'Namn1', 'Namn2', 'AdressGata', 'AdressVaning', 'AdressPostnr', 'AdressPost', 'Typ', 'Datum', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon', 'LghArea', 'Belopp', 'LghData'],
             PROP_URL => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/3C82828B45507253C12579C500429889/$File/48775_1003.pdf?openElement',
             PROP_ROWPROCESSOR => function ($row, $contacts) {
                 $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
+
+                if ($row['Belopp']) {
+                    $row['Belopp'] = array_unique(array_map(function ($value) {
+                        return str_replace(' ', '', $value);
+                    }, $row['Belopp']));
+                }
+
+                // Remove trailing marker for "Bostadsrätt"
+                $row['LghData'] = [str_replace(" B", "", $row['LghData'][0])];
 
                 addContactColumn($row, $contacts, 'Namn1');
 
@@ -361,9 +370,10 @@ $REPORTS = [
                 new PositionRule("Typ", "1680 240"),
                 new PositionRule("Typ", "1080 960"),
                 new TextRule("KrKvm", '\d{3,},\d', false),
-                new TextRule("LghArea", '\d{1,2},\d', false, ["ContractArea"]),
+                new TextRule("LghArea", '\d{1,2},0', false, ["ContractArea"]),
                 new PositionRule("LghData", "0 -240"),
                 new PositionRule("Belopp", "-802 -1166"),
+                new PositionRule("Belopp", "6374 0"),
                 new PositionRule("Avisering", "-12854 -720"),
                 new PositionRule("AdressGata", "0 -480"),
                 new PositionRule("AdressPost", "0 240"),
@@ -466,7 +476,7 @@ $REPORTS = [
             $row['UpplatelseAvgift'] = [preg_replace('/\D/', '', $row['UpplatelseAvgift'][0])];
             return $row;
         },
-        PROP_COLUMNS => ['LghData','Area','ProcentArsavgift','UpplatelseAvgift','Insats','AdressPostnr','AdressGata','Objekt','Vaning'],
+        PROP_COLUMNS => ['LghData', 'Area', 'ProcentArsavgift', 'UpplatelseAvgift', 'Insats', 'AdressPostnr', 'AdressGata', 'Objekt', 'Vaning'],
         PROP_REPORTREADER => new Reader("apartments", "/doc/row/Tj[text() = 'LÄGENHETSFÖRTECKNING']", ["PageStart"], false, [
 
             new PositionRule("PageStart", "1454 -1422", true),
