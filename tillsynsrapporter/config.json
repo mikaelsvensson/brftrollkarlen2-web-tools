@@ -2,22 +2,63 @@
   "graphs": [
     {
       "title": "Cirkusvägen 7, Pumprum, Vattenmätare 245961",
-      "reportTitles": ["Cirkusvägen 7, Pumprum, VM 245961"],
+      "reportTitles": [
+        "Cirkusvägen 7, Pumprum, VM 245961"
+      ],
       "description": "En av alla våra vattenmätare"
     },
     {
       "title": "Tombolavägen 14, E1",
-      "reportTitles": ["Tombolavägen 14, El-mätare p-värmare, E1"],
+      "reportTitles": [
+        "Tombolavägen 14, El-mätare p-värmare, E1"
+      ],
       "description": "?"
     },
     {
       "title": "Tombolavägen 14, E1 del 3",
-      "reportTitles": ["Tombolavägen 14, El-mätare p-värmare, E1 del 3"],
+      "reportTitles": [
+        "Tombolavägen 14, El-mätare p-värmare, E1 del 3"
+      ],
       "description": "?"
     },
     {
       "title": "Tombolavägen 14, E1 del 2",
-      "reportTitles": ["Tombolavägen 14, El-mätare p-värmare, E1 del 2"],
+      "reportTitles": [
+        "Tombolavägen 14, El-mätare p-värmare, E1 del 2"
+      ],
+      "description": "?"
+    },
+    {
+      "title": "Undercentral, Delta T normvärde 35",
+      "reportTitles": [
+        "Karusellvägen 49, Undercentral, Delta T normvärde 35",
+        "Karusellvägen 49, Undercentral, Dela T normvärde 35"
+      ],
+      "description": "?"
+    },
+    {
+      "title": "Tombolavägen 12, Pumprum, VM 245227",
+      "reportTitles": [
+        "Tombolavägen 12, Pumprum, VM 245227 mätare",
+        "Tombolavägen 12, Pumprum, VM 245227"
+      ],
+      "description": "?"
+    },
+    {
+      "title": "Tombolavägen 12, Pumprum, VM 245226",
+      "reportTitles": [
+        "Tombolavägen 12, Pumprum, VM 245226 mätare",
+        "Tombolavägen 12, Pumprum, VM 245226     mätare",
+        "Tombolavägen 12, Pumprum, VM 245226"
+      ],
+      "description": "?"
+    },
+    {
+      "title": "Tombolavägen 14, El-mätare p-värmare, K1",
+      "reportTitles": [
+        "Tombolavägen 14, El-rum, K1 KWh",
+        "Tombolavägen 14, El-mätare p-värmare, K1 KWh"
+      ],
       "description": "?"
     }
   ]

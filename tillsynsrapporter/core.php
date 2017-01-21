@@ -1,5 +1,5 @@
 <?php
-function loadReport($file)
+function loadReport($file, $config)
 {
     $cacheFile = $file . ".json";
     if (true /*!file_exists($cacheFile)*/) {
@@ -16,6 +16,7 @@ function loadReport($file)
             if (empty(join("", $row))) {
                 continue;
             }
+            $row = array_map("trim", $row);
             $Fastighet = !empty($row[0]) ? $row[0] : $Fastighet;
             $Objekt = !empty($row[1]) ? $row[1] : $Objekt;
             $Anmarkning = !empty($row[2]) ? "X" : "";
@@ -27,7 +28,7 @@ function loadReport($file)
             $matches = [];
             $reportTitle = null;
             if (preg_match('/^0*(\d+[\.,]?\d*)\s*(.*)/', $Data, $matches)) {
-                $swedishNewMeterPattern = "/ny m.+tare/i";
+                $swedishNewMeterPattern = '/\s*n?y? m.+tare\s*/i';
                 $reportTitle = trim(preg_replace($swedishNewMeterPattern, "", "{$Fastighet}, {$Objekt}, {$Kommentar}"));
                 $value = $matches[1];
                 if (!empty($matches[2])) {
@@ -40,6 +41,14 @@ function loadReport($file)
                 $reportTitle = trim("{$Fastighet}, {$Objekt}");
             }
             $key = getReportId($file);
+
+            $matches = array_filter($config->graphs, function ($object) use ($reportTitle) {
+                return in_array($reportTitle, $object->reportTitles, false);
+            });
+            if (!empty($matches)) {
+                $graphConfig = array_values($matches)[0];
+                $reportTitle = isset($graphConfig->title) ? $graphConfig->title : $reportTitle;
+            }
 
             $res[] = [$Fastighet, $Objekt, $Anmarkning, $UtanAnmarkning, $Kommentar, $Data, $reportTitle, $key, $value, $unit];
         }

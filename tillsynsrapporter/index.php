@@ -56,13 +56,15 @@ if (!empty($uploadPath)) {
     handleUploadedReportFile($uploadPath);
 }
 
+$config = json_decode(file_get_contents("config.json"));
+
 $files = getReportFilePaths();
 
 $dataPoints = [];
 $reports = [];
 
 foreach ($files as $file) {
-    $report = loadReport($file);
+    $report = loadReport($file, $config);
     $reports[$file] = $report->payload;
 }
 
@@ -139,8 +141,6 @@ printf('</tbody></table>');
 ?>
     <h1>Diagram</h1>
 <?php
-$config = json_decode(file_get_contents("config.json"));
-
 foreach ($dataPoints as $graph => $pairs) {
 
     $matches = array_filter($config->graphs, function ($object) use ($graph) {
