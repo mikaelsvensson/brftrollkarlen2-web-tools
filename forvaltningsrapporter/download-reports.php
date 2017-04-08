@@ -70,15 +70,29 @@ function downloadFileFromUrl($filename, $url)
     curl_setopt($handle, CURLOPT_FILE, $fp);
     curl_setopt($handle, CURLOPT_HEADER, false);
     curl_exec($handle);
-    print_r(curl_getinfo($handle));
+    $contentType = curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
     curl_close($handle);
     fclose($fp);
+    return $contentType;
 }
 
 $timestamp = date('Ymd');
 $force = "true" == $_GET["force"];
 $downloadReportsToday = in_array(substr($timestamp, -2), REPORT_DAYS);
 
+function sendMail($subject, $template, $templateProperties)
+{
+    $body = utf8_decode(file_get_contents($template));
+    $body = str_replace(array_keys($templateProperties), array_values($templateProperties), $body);
+    $additionalHeaders = implode("\r\n", array("From: info@trollkarlen2.se", "Content-Type: text/plain; charset=UTF-8"));
+    mail(
+        MAIL_TO,
+        $subject,
+        utf8_encode($body),
+        $additionalHeaders);
+}
+
+$savedReports = [];
 if ($force || $downloadReportsToday) {
     mkdir(FILES_FOLDER, 0700, true);
     foreach ($REPORTS as $title => $reportCfg) {
@@ -89,8 +103,26 @@ if ($force || $downloadReportsToday) {
         $filename = FILES_FOLDER . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);
         if ($force || !$isReportDownloaded) {
-            downloadFileFromUrl($filename, $url);
+            $contentType = downloadFileFromUrl($filename, $url);
+            if ($contentType == 'application/pdf') {
+                $savedReports[] = $filename;
+            } else {
+                echo "Got $contentType instead of application/pdf";
+                $props = array(
+                    'SCRIPT_PATH' => $_SERVER['PHP_SELF'],
+                    'FILE_PATH' => $filename,
+                    'CONTENT_TYPE' => $contentType,
+                    'STOFAST_USERNAME' => STOFAST_USERNAME
+                );
+                sendMail("[Forvaltningsrapporter] Kunde inte ladda ner rapport", "download-report-mail-contenttypeerror.utf8.txt", $props);
+                break;
+            }
         }
+    }
+    if (count($savedReports) > 0) {
+        sendMail("[Forvaltningsrapporter] Rapporter nedladdade",
+            "download-report-mail-savedreports.utf8.txt",
+            array("REPORTS" => implode("\n - ", $savedReports)));
     }
     echo "Done";
 } else {

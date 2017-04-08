@@ -1,0 +1,5 @@
+Något gick nog fel när SCRIPT_PATH sparades FILE_PATH eftersom filtypen är CONTENT_TYPE istället för application/pdf.
+
+Möjliga orsaker:
+- Lösenordet för STOFAST_USERNAME har ändrats,
+- Entré har ändrats så att skriptet inte längre kan läsa webbsidorna.
