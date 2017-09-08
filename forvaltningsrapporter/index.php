@@ -24,7 +24,9 @@ function printReportsMenu($selectedReportId)
 {
     global $REPORTS;
     print join('', array_map(function ($title, $reportCfg) use ($selectedReportId) {
-        return sprintf('<li class="%s"><a href="?report=%s">%s</a></li>', $title == $selectedReportId ? 'active' : '', $title, $reportCfg['title']);
+        $reportTitle = $reportCfg['title'];
+        // Print link to report if report has a title:
+        return !empty($reportTitle) ? sprintf('<li class="%s"><a href="?report=%s">%s</a></li>', $title == $selectedReportId ? 'active' : '', $title, $reportTitle) : '';
     }, array_keys($REPORTS), $REPORTS));
 }
 

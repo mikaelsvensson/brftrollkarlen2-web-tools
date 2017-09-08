@@ -3,8 +3,12 @@ const PROP_REPORTREADER = 'reportreader';
 const PROP_ROWPROCESSOR = 'rowprocessor';
 const PROP_SUMMARY_GENERATOR = 'summarygenerator';
 const PROP_URL = 'url';
+const PROP_AFTERDOWNLOAD_PROCESSOR = 'afterdownloadprocessor';
 const PROP_COLUMNS = 'columns';
 const PROP_TITLE = 'title';
+
+// Include Composer autoloader if not already done.
+include '../vendor/autoload.php';
 
 require_once 'config/BaseRule.php';
 require_once 'config/PositionRule.php';
@@ -327,6 +331,7 @@ $REPORTS = [
             PROP_URL => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/3C82828B45507253C12579C500429889/$File/48775_1003.pdf?openElement',
             PROP_ROWPROCESSOR => function ($row, $contacts) {
                 $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
+                $row['Objekt'] = array_unique($row['Objekt']);
 
                 if ($row['Belopp']) {
                     fixFormattedCurrency($row, ['Belopp']);
@@ -394,7 +399,9 @@ $REPORTS = [
                 new PositionRule("AdressPost", "0 240"),
                 new PositionRule("AdressGata", "0 -720"),
                 new PositionRule("AdressGata", "1440 480"),
-            ])
+            ], function ($previous, $current) {
+                return $previous["Objekt"][0] == $current["Objekt"][0];
+            })
         ],
     'huvudbok' => [
         PROP_ROWPROCESSOR => function ($row, $contacts) {
@@ -485,9 +492,77 @@ $REPORTS = [
         PROP_ROWPROCESSOR => function ($row, $contacts) {
             $row['Insats'] = [preg_replace('/\D/', '', $row['Insats'][0])];
             $row['UpplatelseAvgift'] = [preg_replace('/\D/', '', $row['UpplatelseAvgift'][0])];
+            $apt_number = substr($row['Objekt'][0], 6);
+            $filename = "maklarbild.lgh-$apt_number.pdf";
+            if (file_exists(FILES_FOLDER . $filename)) {
+                $row['Maklarbild'] = [sprintf('<a href="arkiv/%s">H&auml;mta</a>', $filename)];
+            }
             return $row;
         },
-        PROP_COLUMNS => ['LghData', 'Area', 'ProcentArsavgift', 'UpplatelseAvgift', 'Insats', 'AdressPostnr', 'AdressGata', 'Objekt', 'Vaning'],
+        PROP_TITLE => 'M&auml;klarbild',
+        PROP_URL => 'https://entre.stofast.se/ts/portaler/portal579.nsf/0/95E006CB94B971C5C1257A31003E5CAB/$File/48775_1006.pdf?openElement',
+        PROP_AFTERDOWNLOAD_PROCESSOR => function ($filename) {
+
+            // This post-download processor takes the full report, which has exactly one page per apartment,
+            // and splits it into one new PDF per apartment.
+
+            // Note: This might not hold true in the future for apartments which have been sold a lot of times.
+
+            $pdf = new FPDI();
+
+            // Find out how many pages the full report has:
+            $page_count = $pdf->setSourceFile($filename);
+
+            for ($page_number = 1; $page_number <= $page_count; $page_number++) {
+                $new_pdf = new FPDI();
+                $new_pdf->setSourceFile($filename);
+
+                // Add page to new PDF (and determine if page orientation is portrait or landscape):
+                $specs = $pdf->getTemplateSize($page_number);
+                $new_pdf->AddPage($specs['h'] > $specs['w'] ? 'P' : 'L');
+                $new_pdf->useTemplate($new_pdf->importPage($page_number));
+
+                try {
+                    // Save new PDF:
+                    $new_filename = FILES_FOLDER . "maklarbild.temp-$page_number.pdf";
+                    $new_pdf->Output($new_filename, "F");
+                    $new_pdf->Close();
+
+                    // Parse new PDF, i.e. the new PDF which only has information about a single apartment:
+                    $parser = new \Smalot\PdfParser\Parser();
+                    $new_pdf_parsed = $parser->parseFile($new_filename);
+
+                    $pages = $new_pdf_parsed->getPages();
+
+                    // There will only be one page in $pages
+                    foreach ($pages as $page) {
+                        // Try to find the apartment id in one of the text objects in the PDF:
+                        $pageContents = $page->getText();
+                        $texts = explode("\n", $pageContents);
+                        $text_matches = array_values(array_filter(array_map(function ($text) {
+                            $matches = array();
+                            $is_match = preg_match('/^\d{5}-(\d{4})$/', $text, $matches);
+                            return $is_match ? $matches[1] : null;
+                        }, $texts), function ($value) {
+                            return $value != null;
+                        }));
+
+                        // Only trust the search if a single aparment id is found:
+                        if (count($text_matches) == 1) {
+                            $apt_number = $text_matches[0];
+
+                            // Rename the new PDF so that the name includes the apartment number.
+                            $even_newer_filename = FILES_FOLDER . "maklarbild.lgh-$apt_number.pdf";
+                            rename($new_filename, $even_newer_filename);
+                        }
+                    }
+                } catch (Exception $e) {
+                    // TODO: Exception should probably be handled in some way.
+                    // die($e->getMessage());
+                }
+            }
+        },
+        PROP_COLUMNS => ['LghData', 'Area', 'ProcentArsavgift', 'UpplatelseAvgift', 'Insats', 'AdressPostnr', 'AdressGata', 'Objekt', 'Vaning', 'Maklarbild'],
         PROP_REPORTREADER => new Reader("apartments", "/doc/row/Tj[text() = 'LÄGENHETSFÖRTECKNING']", ["PageStart"], false, [
 
             new PositionRule("PageStart", "1454 -1422", true),

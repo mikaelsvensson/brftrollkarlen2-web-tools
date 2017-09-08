@@ -1,5 +1,9 @@
 <?php
 const COOKIE_HEADER_START = "Set-Cookie: ";
+
+// Include Composer autoloader if not already done.
+include '../vendor/autoload.php';
+
 require_once 'renderer/HtmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'config.php';
@@ -106,6 +110,11 @@ if ($force || $downloadReportsToday) {
             $contentType = downloadFileFromUrl($filename, $url);
             if ($contentType == 'application/pdf') {
                 $savedReports[] = $filename;
+                if (isset($reportCfg['afterdownloadprocessor'])) {
+                    // The after-download processor can, for example, be used to split PDFs after downloading them.
+                    $afterDownloadProcessor = $reportCfg['afterdownloadprocessor'];
+                    $afterDownloadProcessor($filename);
+                }
             } else {
                 echo "Got $contentType instead of application/pdf";
                 $props = array(
