@@ -1,5 +1,29 @@
 Något gick nog fel när SCRIPT_PATH sparades FILE_PATH eftersom filtypen är CONTENT_TYPE istället för application/pdf.
 
-Möjliga orsaker:
-- Lösenordet för STOFAST_USERNAME har ändrats,
-- Entré har ändrats så att skriptet inte längre kan läsa webbsidorna.
+Möjlig orsak:
+  Lösenordet för STOFAST_USERNAME har ändrats.
+Lösning:
+  Redigera filen /verktyg/forvaltningsrapporter/config-credentials.php på
+  webbservern så att rätt lösenord används när rapporter laddas ner.
+
+Möjlig orsak:
+  Lösenordet för STOFAST_USERNAME har gått ut och behöver ändras.
+Lösning:
+  Logga in på Entré som STOFAST_USERNAME och byt lösenord. Redigera sedan
+  filen /verktyg/forvaltningsrapporter/config-credentials.php på webbservern
+  så att det nya lösenordet används när rapporterna laddas ner.
+
+Möjlig orsak:
+  STOFAST_USERNAME har tagits bort som användare från Entré. Lösning:
+Lösning:
+  Redigera filen /verktyg/forvaltningsrapporter/config-credentials.php på
+  webbservern så att giltiga inloggningsuppgifter används när rapporterna
+  laddas ner.
+
+Möjlig orsak:
+  Entré har ändrats så att skriptet inte längre kan läsa webbsidorna.
+Lösning:
+  Det kan finnas flera orsaker till detta problem. Lösningen är troligtvis
+  att en programmerare behöver ändra cURL-anropen i filen download-reports.php.
+
+För att testa om du löst problemet kan du köra om rapportnedladdningen genom att besöka http://trollkarlen2.se/verktyg/forvaltningsrapporter/download-reports.php?force=true
