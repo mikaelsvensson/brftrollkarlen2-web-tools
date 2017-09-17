@@ -6,32 +6,7 @@ Under utveckling. Tanken är att visa grafer över utgifter och inkomster per bo
 
 ## forvaltningsrapporter
 
-Används för att på ett enkelt sätt visa upp information om boende, kontrakt och annat.
-
-Tanken med verktyget är följande:
-* Enkelt se vilka boende som flyttat in resp. ut senaste tiden.
-* Enkelt kopiera information om boende för att använda i personliga brevutskick.
-* Enkelt se all denna information utan att behöva logga in på Entré. Istället behöver man bara logga in med vårat
-gemensamma Google-konto.
-
-I bakgrunden används en styrelsemedlems Entré-konto för att logga in i Entré och hämta rapporterna.
-
-För att kunna se rapporterna måste man logga in med ett Google-konoto och detta fyller två syften:
-1. Det säkerställer att bara de som kan lösenordet till föreningens e-postkonto kan se informationen.
-1. Det gör det möjligt att komplettera informationen som hämtas från Entré med information från Google Contacts.
-
-För att den här PHP-sidan ska kunna anropa Google så har sidan registrerats som ett projekt hos Google. Du hittar
-projektet på https://console.developers.google.com/apis/dashboard?project=brftrollkarlen2-web-tools. Kom ihåg att du
-måste logga in som brf.trollkarlen2@gmail.com.
-
-Via console-sidan så hittar man det "OAuth 2.0 client ID" som PHP-sidan använder för att prata med Google. Namnet på
-PHP-sidan, såsom det är uppsatt hos Google, är "Dokumentgeneratorn" (vilket numera är något missvisande). Kikar man
-närmare på installningarna för "Dokumentgeneratorn" så ser man den "client secret" som också återfinns i
-client_secret_...apps.googleusercontent.com.json på webbservern.
-
-Kända problem:
-* Efter ett tag blir man utloggad från Google men det visas inget felmeddelande. Det enda som händer är att rapporterna
-inte visas. Testa att klicka på "Logga ut och logga in" och försök igen.
+Se forvaltningsrapporter/README.md
 
 ## lib
 

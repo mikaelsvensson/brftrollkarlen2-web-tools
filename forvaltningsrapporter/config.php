@@ -10,6 +10,7 @@ const PROP_TITLE = 'title';
 // Include Composer autoloader if not already done.
 include '../vendor/autoload.php';
 
+//TODO Rename config folder as to not confuse it with config.php
 require_once 'config/BaseRule.php';
 require_once 'config/PositionRule.php';
 require_once 'config/Reader.php';
@@ -21,6 +22,7 @@ use Config\TextRule;
 
 const FILES_FOLDER = './reports-archive/';
 
+//TODO Move to config.php?
 const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
 
 $defaultParams = ['DATUM' => date('Ymd-His')];
@@ -39,6 +41,7 @@ function removeSpaces($value)
     return str_replace(' ', '', $value);
 }
 
+//TODO: Create utility class for Google Contacts?
 function getGoogleContacts($client)
 {
     $feedURL = "https://www.google.com/m8/feeds/contacts/default/thin?max-results=1000&alt=json";
@@ -114,6 +117,7 @@ function addContactColumn(&$row, $contacts, $column)
     return $row;
 }
 
+//TODO: Split into one file or PHP class per report configuration?
 $REPORTS = [
     'hyresfordran' =>
         [

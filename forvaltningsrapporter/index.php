@@ -9,6 +9,7 @@ $isAccessTokenSet = isset($_SESSION['access_token']) && $_SESSION['access_token'
 if (!$isAccessTokenSet) {
     header('Location: ' . filter_var(GOOGLE_OAUTHCALLBACK_URI, FILTER_SANITIZE_URL));
 }
+//TODO: Move obfuscated e-mail address to config.php
 const AUTHORIZED_USER = 'brf.trollkarlen2'.'@'.'g'.'mail.com';
 if ($_SESSION['email'] != AUTHORIZED_USER) {
     die("Only the ".AUTHORIZED_USER." may access this page.");
@@ -37,6 +38,8 @@ function printReportsMenu($selectedReportId)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>F&ouml;rvaltningsrapporter</title>
+
+    <!-- TODO: Use Composer do include CSS files instead of relying on CDN. -->
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 

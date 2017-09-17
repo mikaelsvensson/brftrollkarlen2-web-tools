@@ -1,6 +1,23 @@
 # Förvaltningsrapporter
 
 Det här är ett litet verktyg för att automatiskt ladda ner rapporter från Fastighetsägarnas webbplats Entré.
+I bakgrunden används en styrelsemedlems Entré-konto för att logga in i Entré och hämta rapporterna.
+
+Tanken med verktyget är följande:
+* Gör det enkelt att hitta information om boende, kontrakt och annat.
+* Gör det enkelt se vilka boende som flyttat in resp. ut senaste tiden.
+* Gör det enkelt kopiera information om boende för att använda i personliga brevutskick.
+* Gör det enkelt se all denna information utan att behöva logga in på Entré. Istället behöver du bara logga in med 
+  vårat gemensamma Google-konto.
+
+För att kunna se rapporterna måste man logga in med ett Google-konoto och detta fyller två syften:
+1. Det säkerställer att bara de som kan lösenordet till föreningens e-postkonto kan se informationen.
+1. Det gör det möjligt att komplettera informationen som hämtas från Entré med information från Google Contacts.
+
+## Kända problem
+
+* Efter ett tag blir man utloggad från Google men det visas inget felmeddelande. Det enda som händer är att rapporterna
+inte visas. Testa att klicka på "Logga ut och logga in" och försök igen.
 
 ## Funktioner
 
@@ -25,6 +42,8 @@ Filen config-credentials.php innehåller användarnamn och lösenord till Entré:
     
 Filen finns inte incheckad i Git och måste därför skapas manuellt i samma mapp som config.php ligger i.
 
+Använd forvaltningsrapporter/config-credentials.sample.php som mall.
+
 ### Rapportbeskrivningar
 
 Filen cfg.xml innehåller instruktioner för hur information ska extraheras ur de PDF-filer som kan laddas ner via Entré.
@@ -45,12 +64,19 @@ Specialfall:
 
 ### Google API-nyckel
 
+För att den här PHP-sidan ska kunna anropa Google så har sidan registrerats som ett projekt hos Google. Du hittar
+projektet på https://console.developers.google.com/apis/dashboard?project=brftrollkarlen2-web-tools. Kom ihåg att du
+måste logga in som brf.trollkarlen2@gmail.com.
+
+Via console-sidan så hittar man det "OAuth 2.0 client ID" som PHP-sidan använder för att prata med Google. Namnet på
+PHP-sidan, såsom det är uppsatt hos Google, är "Dokumentgeneratorn" (vilket numera är något missvisande). Kikar man
+närmare på installningarna för "Dokumentgeneratorn" så ser man den "client secret" som också återfinns i
+client_secret_...apps.googleusercontent.com.json på webbservern.
+
 För att kunna använda verktyget för att generera dokument utifrån värden från rapportrader så behöver en JSON-fil med
 Google-nyckel finnas tillgänglig. JSON-filen kan laddas ner från Google Developer Console på 
 https://console.developers.google.com/apis/credentials?project=brftrollkarlen2-web-tools
     
-Verktyget finns registrerad som OAuth-klienten "Dokumentgeneratorn".
-
 JSON-filen ska sparas på den plats som anges i konstanten GOOGLE_CLIENT_SECRET_FILE (se google-util.php).
 
 ## Ladda ner rapporter
