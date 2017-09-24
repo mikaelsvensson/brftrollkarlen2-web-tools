@@ -121,18 +121,20 @@ class ReportReader
         $apts = array_filter($apts, $this->create_filter_function($skipAptIfHeaderExists));
 
         $title = "" . $reader->id;
+//        print_r($REPORTS);
+//        print_r($title);
         $reportCfg = $REPORTS[$title];
         // Configuration specifies columns in array. Filtering function should use array values as keys.
 
-        if (isset($reportCfg['rowprocessor'])) {
-            $rowprocessor = $reportCfg['rowprocessor'];
+        if ($reportCfg->getRowProcessor() != null) {
+            $rowprocessor = $reportCfg->getRowProcessor();
             $fn = function ($apt) use ($contacts, $rowprocessor) {
                 return $rowprocessor($apt, $contacts);
             };
             $apts = array_map($fn, $apts);
         }
-        if (isset($reportCfg['columns'])) {
-            $columns = array_fill_keys($reportCfg['columns'], null);
+        if ($reportCfg->getColumns() != null) {
+            $columns = array_fill_keys($reportCfg->getColumns(), null);
             $apts = array_map(function ($obj) use ($columns) {
                 return array_intersect_key($obj, $columns);
             }, $apts);

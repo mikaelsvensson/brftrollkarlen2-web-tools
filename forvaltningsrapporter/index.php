@@ -1,18 +1,19 @@
 <?php
-error_reporting(E_WARNING);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 require_once 'config.php';
 require_once 'google-util.php';
 require_once 'index-showreport-latest.php';
 
+$cfg = parse_ini_file("config.ini", true);
+
 $isAccessTokenSet = isset($_SESSION['access_token']) && $_SESSION['access_token'];
 if (!$isAccessTokenSet) {
-    header('Location: ' . filter_var(GOOGLE_OAUTHCALLBACK_URI, FILTER_SANITIZE_URL));
+    header('Location: ' . filter_var($cfg['google']['oauthcallback_uri'], FILTER_SANITIZE_URL));
 }
-//TODO: Move obfuscated e-mail address to config.php
-const AUTHORIZED_USER = 'brf.trollkarlen2'.'@'.'g'.'mail.com';
-if ($_SESSION['email'] != AUTHORIZED_USER) {
-    die("Only the ".AUTHORIZED_USER." may access this page.");
+$authorized_user = $cfg['google']['authorized_gmail_user'].'@gmail.com';
+if ($_SESSION['email'] != $authorized_user) {
+    die("Only $authorized_user may access this page.");
 };
 
 $reportId = $_GET['report'];
@@ -25,7 +26,7 @@ function printReportsMenu($selectedReportId)
 {
     global $REPORTS;
     print join('', array_map(function ($title, $reportCfg) use ($selectedReportId) {
-        $reportTitle = $reportCfg['title'];
+        $reportTitle = $reportCfg->getTitle();
         // Print link to report if report has a title:
         return !empty($reportTitle) ? sprintf('<li class="%s"><a href="?report=%s">%s</a></li>', $title == $selectedReportId ? 'active' : '', $title, $reportTitle) : '';
     }, array_keys($REPORTS), $REPORTS));

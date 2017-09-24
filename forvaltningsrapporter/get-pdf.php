@@ -6,7 +6,8 @@ if (!isset($_GET['file'])) {
 if (preg_match('/[^a-z0-9.-]/', $_GET['file'])) {
     die('File name seems invalid');
 }
-$path = FILES_FOLDER . $_GET['file'];
+$cfg = parse_ini_file("config.ini", true);
+$path = $cfg['reports']['archive_folder'] . $_GET['file'];
 if (!is_file($path)) {
     die('File not found');
 }

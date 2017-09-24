@@ -28,7 +28,7 @@ if ($_POST['renderer']) {
 
         $reportCfg = null;
         foreach ($REPORTS as $cfg) {
-            if ($cfg['reportreader']->accepts($xml)) {
+            if ($cfg->getReportReader()->accepts($xml)) {
                 $reportCfg = $cfg;
             }
         }
@@ -36,7 +36,7 @@ if ($_POST['renderer']) {
             die("Hittar ingen beskrivning f&ouml;r hur filen ska l&auml;sas.");
         }
 
-        $reader = new ReportReader($reportCfg['reportreader']);
+        $reader = new ReportReader($reportCfg->getReportReader());
         $apts = $reader->getReportObjects($xml);
         if (!isset($apts)) {
             die("Kunde inte skapa rapporter.");
@@ -45,8 +45,8 @@ if ($_POST['renderer']) {
         $renderer->writerDocStart();
         $renderer->write($apts);
 
-        if (isset($reportCfg['summarygenerator'])) {
-            $rowprocessor = $reportCfg['summarygenerator'];
+        if ($reportCfg->getSummaryGenerator() != null) {
+            $rowprocessor = $reportCfg->getSummaryGenerator();
             $summaryData = $rowprocessor($apts);
             $renderer->write($summaryData);
         }

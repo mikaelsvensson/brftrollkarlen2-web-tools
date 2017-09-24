@@ -3,6 +3,8 @@
 require_once '../vendor/autoload.php';
 require_once 'config.php';
 
+$cfg = parse_ini_file("config.ini", true);
+
 require_once 'renderer/BootstrapHtmlRenderer.php';
 require_once 'ReportReader.php';
 require_once 'PdfParserWrapper.php';
@@ -23,14 +25,14 @@ function create_starts_with_function($prefix)
 
 function printReport($title, $contacts)
 {
-    global $REPORTS;
+    global $REPORTS, $cfg;
     $joinAll = function ($a, $b) {
         $compA = join(array_map("join", $a));
         $compB = join(array_map("join", $b));
         return strcmp($compA, $compB);
     };
 
-    $files = scandir(FILES_FOLDER, SCANDIR_SORT_DESCENDING);
+    $files = scandir($cfg['reports']['archive_folder'], SCANDIR_SORT_DESCENDING);
     $renderer = new BootstrapHtmlRenderer();
     $reportCfg = $REPORTS[$title];
 
@@ -41,18 +43,23 @@ function printReport($title, $contacts)
 
     foreach ($reportFiles as $file) {
         if (substr($file, 0, strlen($title)) == $title) {
-            $filename = FILES_FOLDER . $file;
+            $filename = $cfg['reports']['archive_folder'] . $file;
 
-            $wrapper = new PdfParserWrapper();
-            $content = $wrapper->pdfToXml($filename);
+            try {
+                $wrapper = new PdfParserWrapper();
+                $content = $wrapper->pdfToXml($filename);
+            } catch (Exception $e) {
+                printf('<p>Kan inte visa <var>%s</var> pga. "%s".</p>', $file, $e->getMessage());
+                continue;
+            }
 
             $xml = simplexml_load_string($content);
 
-            $reader = new ReportReader($reportCfg['reportreader']);
+            $reader = new ReportReader($reportCfg->getReportReader());
             $apts = $reader->getReportObjects($xml);
 
-            if (isset($reportCfg['rowprocessor'])) {
-                $rowprocessor = $reportCfg['rowprocessor'];
+            if ($reportCfg->getRowProcessor() != null) {
+                $rowprocessor = $reportCfg->getRowProcessor();
                 $fn = function ($apt) use ($contacts, $rowprocessor) {
                     return $rowprocessor($apt, $contacts);
                 };
@@ -61,7 +68,7 @@ function printReport($title, $contacts)
 
             if (isset($apts)) {
                 // Configuration specifies columns in array. Filtering function should use array values as keys.
-                $joiner = isset($reportCfg['columns']) ? create_column_filter_function(array_fill_keys($reportCfg['columns'], null)) : null;
+                $joiner = $reportCfg->getColumns() != null ? create_column_filter_function(array_fill_keys($reportCfg->getColumns(), null)) : null;
 
                 if (isset($joiner)) {
                     $apts = array_map($joiner, $apts);
@@ -82,8 +89,8 @@ function printReport($title, $contacts)
         if ($i == 0) {
             $renderer->write($reportsData[$file]);
 
-            if (isset($reportCfg['summarygenerator'])) {
-                $rowprocessor = $reportCfg['summarygenerator'];
+            if ($reportCfg->getSummaryGenerator() != null) {
+                $rowprocessor = $reportCfg->getSummaryGenerator();
                 $summaryData = $rowprocessor($reportsData[$file]);
                 $renderer->write($summaryData);
             }

@@ -5,9 +5,11 @@ ini_set('display_errors', 1);
 require_once 'config.php';
 require_once 'google-util.php';
 
+$cfg = parse_ini_file("config.ini", true);
+
 $isAccessTokenSet = isset($_SESSION['access_token']) && $_SESSION['access_token'];
 if (!$isAccessTokenSet) {
-    header('Location: ' . filter_var(GOOGLE_OAUTHCALLBACK_URI, FILTER_SANITIZE_URL));
+    header('Location: ' . filter_var($cfg['google']['oauthcallback_uri'], FILTER_SANITIZE_URL));
 }
 
 $client = createGoogleClient();

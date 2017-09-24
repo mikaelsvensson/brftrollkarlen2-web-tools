@@ -84,7 +84,10 @@ function downloadFileFromUrl($filename, $url)
 
 $timestamp = date('Ymd');
 $force = "true" == $_GET["force"];
-$downloadReportsToday = in_array(substr($timestamp, -2), REPORT_DAYS);
+
+$cfg = parse_ini_file("config.ini", true);
+
+$downloadReportsToday = in_array(substr($timestamp, -2), explode(',', $cfg['reports']['trigger_days_of_months']));
 
 function sendMail($subject, $template, $templateProperties)
 {
@@ -100,21 +103,21 @@ function sendMail($subject, $template, $templateProperties)
 
 $savedReports = [];
 if ($force || $downloadReportsToday) {
-    mkdir(FILES_FOLDER, 0700, true);
+    mkdir($cfg['reports']['archive_folder'], 0700, true);
     foreach ($REPORTS as $title => $reportCfg) {
-        $url = $reportCfg['url'];
+        $url = $reportCfg->getUrl();
         if (empty($url)) {
             continue;
         }
-        $filename = FILES_FOLDER . $title . '-' . $timestamp . '.pdf';
+        $filename = $cfg['reports']['archive_folder'] . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);
         if ($force || !$isReportDownloaded) {
             $contentType = downloadFileFromUrl($filename, $url);
             if ($contentType == 'application/pdf') {
                 $savedReports[] = $filename;
-                if (isset($reportCfg['afterdownloadprocessor'])) {
+                if ($reportCfg->getAfterDownloadProcessor() != null) {
                     // The after-download processor can, for example, be used to split PDFs after downloading them.
-                    $afterDownloadProcessor = $reportCfg['afterdownloadprocessor'];
+                    $afterDownloadProcessor = $reportCfg->getAfterDownloadProcessor();
                     $afterDownloadProcessor($filename);
                 }
             } else {
