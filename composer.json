@@ -1,6 +1,7 @@
 {
   "require": {
-    "smalot/pdfparser": "*",
+    "google/apiclient": "^2.0",
+    "smalot/pdfparser": "v0.10.0",
     "setasign/fpdf": "1.8.1",
     "setasign/fpdi-fpdf": "1.6.2",
     "setasign/fpdi": "1.6.2"
