@@ -1,7 +1,5 @@
 <?php
 
-//namespace report\renderer;
-
 class BootstrapHtmlRenderer
 {
     function writerDocStart()

@@ -214,21 +214,16 @@ class PdfParserWrapper
     }
 
 
-    /**
-     * @param $filename
-     * @return string
-     * @throws Exception
-     */
     function pdfToXml($filename)
     {
-// Parse pdf file and build necessary objects.
+        // Parse pdf file and build necessary objects.
         $parser = new \Smalot\PdfParser\Parser();
         $pdf = $parser->parseFile($filename);
 
-// Retrieve all pages from the pdf file.
+        // Retrieve all pages from the pdf file.
         $pages = $pdf->getPages();
 
-// Loop over each page to extract text.
+        // Loop over each page to extract text.
         $content = "";
         foreach ($pages as $page) {
             $pageContents = $page->get('Contents');

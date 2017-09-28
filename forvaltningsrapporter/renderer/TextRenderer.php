@@ -1,6 +1,4 @@
 <?php
-//namespace report\renderer;
-
 class TextRenderer
 {
     function writerDocStart()

@@ -1,12 +1,4 @@
 <?php
-//const PROP_REPORTREADER = 'reportreader';
-//const PROP_ROWPROCESSOR = 'rowprocessor';
-//const PROP_SUMMARY_GENERATOR = 'summarygenerator';
-//const PROP_URL = 'url';
-//const PROP_AFTERDOWNLOAD_PROCESSOR = 'afterdownloadprocessor';
-//const PROP_COLUMNS = 'columns';
-//const PROP_TITLE = 'title';
-
 // Include Composer autoloader if not already done.
 include '../vendor/autoload.php';
 
@@ -21,12 +13,6 @@ use Config\PositionRule;
 use Config\Reader;
 use Config\Report;
 use Config\TextRule;
-
-//const FILES_FOLDER = './reports-archive/';
-
-//const REPORT_DAYS = ["01", "03", "05", "15", "26", "28", "30"];
-
-//const GOOGLE_CLIENT_SECRET_FILE = '../client_secret_109116865971-kkggsgkcf1ak2ffg6vlr2lj80vv8opb1.apps.googleusercontent.com.json';
 
 $defaultParams = ['DATUM' => date('Ymd-His')];
 
@@ -49,9 +35,7 @@ function removeSpaces($value)
 //TODO: Create utility class for Google Contacts?
 function getGoogleContacts($client)
 {
-    $feedURL = "https://www.google.com/m8/feeds/contacts/default/thin?max-results=1000&alt=json";
     $feedURL = "https://www.google.com/m8/feeds/contacts/default/full?max-results=1000&alt=json";
-    //        $feedURL = "https://www.google.com/m8/feeds/contacts/default/full";
     $req = new Google_Http_Request($feedURL, 'GET', array("GData-Version" => "3.0"));
     $val = $client->getAuth()->authenticatedRequest($req);
 

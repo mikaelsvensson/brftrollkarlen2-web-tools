@@ -5,8 +5,6 @@ require_once '../lib/google-api-php-client-1-master/src/Google/autoload.php';
 
 $cfg = parse_ini_file("config.ini", true);
 
-//TODO: Retrieve hostname from value in of of PHP's "super-globals"
-//const GOOGLE_OAUTHCALLBACK_URI = 'http://www.trollkarlen2.se/verktyg/forvaltningsrapporter/auth-google.php';
 //TODO: Why is set_include_path needed here?
 set_include_path(get_include_path() . PATH_SEPARATOR . '../lib/google-api-php-client-1-master/src');
 
@@ -19,7 +17,7 @@ function createGoogleClient()
     $client = new Google_Client();
     $client->setAuthConfigFile($cfg['google']['client_secret_file']);
     $client->setRedirectUri($cfg['google']['oauthcallback_uri']);
-//    $client->addScope(Google_Service_Drive::DRIVE_METADATA);
+    //$client->addScope(Google_Service_Drive::DRIVE_METADATA);
     //TODO: Why do we need the scope Google_Service_Drive::DRIVE?
     $client->addScope(Google_Service_Drive::DRIVE);
     //TODO: Why do we need the scope Google_Service_Plus::USERINFO_EMAIL?

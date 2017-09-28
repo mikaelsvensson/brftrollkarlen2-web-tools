@@ -1,6 +1,4 @@
 <?php
-//namespace report\renderer;
-
 class XmlRenderer
 {
     function writerDocStart()

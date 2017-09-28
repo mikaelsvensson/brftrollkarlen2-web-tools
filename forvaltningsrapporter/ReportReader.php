@@ -23,22 +23,11 @@ class ReportReader
     {
         global $REPORTS;
 
-//        $cfg = $this->cfg;
-
         $apts = array();
         $field = 'ExtraInformation';
         $i = 0;
 
         $reader = $this->reportReader;
-//        foreach ($this->reportReaders as $r) {
-//            $res = $xml->xpath($r->xpathMatchPattern);
-//            if ($res !== false && count($res) > 0) {
-//                $reader = $r;
-//            }
-//        }
-//        if (!$reader) {
-//            return null;
-//        }
         $skipAptIfHeaderExists = $reader->skipEntriesWithColumn;
         $sortColumnsByPosition = $reader->sortColumnsByPosition;
 
@@ -120,9 +109,8 @@ class ReportReader
 
         $apts = array_filter($apts, $this->create_filter_function($skipAptIfHeaderExists));
 
+        //TODO: Do not use $reader->id since it means that $reader->id needs to duplicate the key in $REPORTS
         $title = "" . $reader->id;
-//        print_r($REPORTS);
-//        print_r($title);
         $reportCfg = $REPORTS[$title];
         // Configuration specifies columns in array. Filtering function should use array values as keys.
 
