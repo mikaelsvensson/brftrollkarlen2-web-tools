@@ -36,16 +36,27 @@ function removeSpaces($value)
 function getGoogleContacts($client)
 {
     $feedURL = "https://www.google.com/m8/feeds/contacts/default/full?max-results=1000&alt=json";
-    $req = new Google_Http_Request($feedURL, 'GET', array("GData-Version" => "3.0"));
-    $val = $client->getAuth()->authenticatedRequest($req);
+//    $req = new Google_Http_Request($feedURL, 'GET', array("GData-Version" => "3.0"));
+//    $val = $client->getAuth()->authenticatedRequest($req);
 
     // The contacts api only returns XML responses.
-    $responseRaw = $val->getResponseBody();
+//    $responseRaw = $val->getResponseBody();
 
-    $response = json_decode($responseRaw, true)['feed']['entry'];
+
+    // returns a Guzzle HTTP Client
+    $httpClient = $client->authorize();
+
+    // make an HTTP request
+    $response = $httpClient->get($feedURL);
+
+    if ($response->getStatusCode() != 200) {
+        printf('<p>Kunde inte h&auml;mta kontaktlistan. Felkod %d.</p>', $response->getStatusCode());
+    }
+
+    $body = json_decode($response->getBody(), true)['feed']['entry'];
 
     $contacts = array_map(function ($contact) {
-        $aptAccessFromDateProps = is_array($contact['gContact$userDefinedField']) ? array_filter($contact['gContact$userDefinedField'],
+        $aptAccessFromDateProps = isset($contact['gContact$userDefinedField']) && is_array($contact['gContact$userDefinedField']) ? array_filter($contact['gContact$userDefinedField'],
             function ($item) {
                 return strpos($item['key'], 'Tilltr') != -1;
             }) : [];
@@ -55,12 +66,12 @@ function getGoogleContacts($client)
             'note' => isset($contact['content']) ? $contact['content']['$t'] : null,
             'email' => isset($contact['gd$email']) ? $contact['gd$email'][0]['address'] : null,
             'phone' => isset($contact['gd$phoneNumber']) ? $contact['gd$phoneNumber'][0]['$t'] : null,
-            'orgName' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgName']['$t'] : null,
-            'orgTitle' => isset($contact['gd$organization']) ? $contact['gd$organization'][0]['gd$orgTitle']['$t'] : null,
+            'orgName' => isset($contact['gd$organization']) && isset($contact['gd$organization'][0]['gd$orgName']) ? $contact['gd$organization'][0]['gd$orgName']['$t'] : null,
+            'orgTitle' => isset($contact['gd$organization']) && isset($contact['gd$organization'][0]['gd$orgTitle']) ? $contact['gd$organization'][0]['gd$orgTitle']['$t'] : null,
             'aptAccessFrom' => count($aptAccessFromDateProps) > 0 ? $aptAccessFromDateProps[0]['value'] : null,
             'address' => isset($contact['gd$postalAddress']) ? explode("\n", $contact['gd$postalAddress'][0]['$t']) : null
         ];
-    }, $response);
+    }, $body);
     return $contacts;
 }
 
@@ -71,7 +82,7 @@ function findContacts($row, $contacts, $column)
         sort($nameParts);
         return implode(' ', array_map("soundex", $nameParts));
     };
-    $str = $fn($row[$column][0]);
+    $str = @$fn($row[$column][0]);
     return array_filter($contacts, function ($contact) use ($str, $fn) {
         return $str == $fn($contact['name']);
     });
@@ -112,7 +123,9 @@ function getDebtReportConfig()
     $report->setColumns(['LghNr', 'Fakturanr', 'Restbelopp', 'Hyresgast', 'Forfallodatum', 'DagarForsening', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon']);
     $report->setUrl('https://entre.stofast.se/ts/portaler/portal579.nsf/0/5CA3A55A0BECD55DC12579C50042A060/$File/48775_1001.pdf?openElement');
     $report->setRowProcessor(function ($row, $contacts) {
-        $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
+        if (isset($row['Objekt'])) {
+            $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
+        }
 
         $date = DateTime::createFromFormat('Y-m-d', $row['Forfallodatum'][0]);
         $interval = date_diff(new DateTime(), $date);
@@ -129,14 +142,14 @@ function getDebtReportConfig()
             $debtee = $row['Hyresgast'][0];
             $amount = intval(preg_replace('/\D/', '', $row['Restbelopp'][0]));
 
-            $res[$debtee]['Hyresgast'][0] = $debtee;
-            $res[$debtee]['TotalRestbelopp'][0] += $amount;
-            $res[$debtee]['AntalRestbelopp'][0]++;
+            @$res[$debtee]['Hyresgast'][0] = $debtee;
+            @$res[$debtee]['TotalRestbelopp'][0] += $amount;
+            @$res[$debtee]['AntalRestbelopp'][0]++;
             $sum += $amount;
         }
-        $res["sum"]['Hyresgast'][0] = "SUMMA";
-        $res["sum"]['TotalRestbelopp'][0] = $sum;
-        $res["sum"]['AntalRestbelopp'][0] = count($data);
+        @$res["sum"]['Hyresgast'][0] = "SUMMA";
+        @$res["sum"]['TotalRestbelopp'][0] = $sum;
+        @$res["sum"]['AntalRestbelopp'][0] = count($data);
         return array_values($res);
     });
     $report->setReportReader(new Reader("hyresfordran", "/doc/row/Tj[text() = 'HYRESFORDRAN']", ["Header", "Footer"], false, [
@@ -226,15 +239,16 @@ function getContractsReportConfig()
     $report->setColumns(['Objekt', 'Typ', 'Hyresgast', 'Area', 'Fran', 'Till', 'DagarKvar', 'KontaktNamn', 'KontaktEpost', 'KontaktTelefon']);
     $report->setUrl('https://entre.stofast.se/ts/portaler/portal579.nsf/0/F0DAE4CB20A599E8C12579C50042A74F/$File/48775_1002.pdf?openElement');
     $report->setRowProcessor(function ($row, $contacts) {
-        $period = $row['Kontraktstid'][0];
-        list($from, $to) = explode(' - ', $period);
-        $row['Fran'] = [$from];
-        $row['Till'] = [$to];
+        if (isset($row['Kontraktstid'])) {
+            $period = $row['Kontraktstid'][0];
+            list($from, $to) = explode(' - ', $period);
+            $row['Fran'] = [$from];
+            $row['Till'] = [$to];
+            $toDate = DateTime::createFromFormat('Y-m-d', $to);
+            $interval = date_diff(new DateTime(), $toDate);
+            $row['DagarKvar'] = [$interval->days];
+        }
         $row['Objekt'] = [substr($row['Objekt'][0], 6)];
-
-        $toDate = DateTime::createFromFormat('Y-m-d', $to);
-        $interval = date_diff(new DateTime(), $toDate);
-        $row['DagarKvar'] = [$interval->days];
 
         addContactColumn($row, $contacts, 'Hyresgast');
 
@@ -329,13 +343,15 @@ function getObjectsReportConfig()
         $row['LghNr'] = [intval(substr($row['Objekt'][0], 6), 10)];
         $row['Objekt'] = array_unique($row['Objekt']);
 
-        if ($row['Belopp']) {
+        if (isset($row['Belopp'])) {
             fixFormattedCurrency($row, ['Belopp']);
             $row['Belopp'] = array_unique($row['Belopp']);
         }
 
-        // Remove trailing marker for "Bostadsrätt"
-        $row['LghData'] = [str_replace(" B", "", $row['LghData'][0])];
+        if (isset($row['LghData'])) {
+            // Remove trailing marker for "Bostadsrätt"
+            $row['LghData'] = [str_replace(" B", "", $row['LghData'][0])];
+        }
 
         addContactColumn($row, $contacts, 'Namn1');
 
