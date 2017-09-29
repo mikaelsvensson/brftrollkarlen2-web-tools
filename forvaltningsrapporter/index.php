@@ -16,7 +16,7 @@ if ($_SESSION['email'] != $authorized_user) {
     die("Only $authorized_user may access this page.");
 };
 
-$reportId = $_GET['report'];
+$reportId = @$_GET['report'];
 
 $client = createGoogleClient();
 

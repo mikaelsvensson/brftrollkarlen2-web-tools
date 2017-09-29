@@ -12,7 +12,7 @@ class Report
     private $columns = null;
     private $title = null;
 
-    public function __construct($title)
+    public function __construct($title = null)
     {
         $this->title = $title;
     }
