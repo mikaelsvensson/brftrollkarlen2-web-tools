@@ -1,8 +1,9 @@
 <?php
 $local_file_names = scandir($cfg['reports']['archive_folder'], SCANDIR_SORT_ASCENDING);
+$do_sync_action = isset($_POST['action']) && $_POST['action'] == 'sync';
 ?>
 <div class="container-fluid">
-    <form action="?report=sync" method="post" class="form-horizontal">
+    <form action="?report=sync" method="post" class="form">
         <?php
         const HTML_ENTITY_UNICODE_FOLDER = "&#x1f5c1;";
         $drive_service = new Google_Service_Drive($client);
@@ -42,41 +43,38 @@ $local_file_names = scandir($cfg['reports']['archive_folder'], SCANDIR_SORT_ASCE
         }
 
         ?>
-        <h3>Var vill du spara rapporterna p&aring; Google Drive?</h3>
+        <h3>Kopiera rapportfiler till Google Drive</h3>
+
+        <p>Använd den här funktionen för att kopiera alla arkiverade PDF-filer till en mapp på Google Drive.</p>
 
         <p><?= sprintf('Totalt finns det %d arkiverade rapporter p&aring; den h&auml;r sidan (oklart hur m&aring;nga som redan kopierats till Google Drive).', count($local_file_names)); ?></p>
 
         <div class="form-group">
-            <div class="col-sm-12">
-                <select name="target_folder" class="form-control">
-                    <?php
-                    foreach ($roots as $root) {
-                        processSyncFormFolder($root, 0);
-                    }
-                    ?>
-                </select>
-            </div>
+            <label>Mapp </label>
+            <select name="target_folder" class="form-control">
+                <?php
+                foreach ($roots as $root) {
+                    processSyncFormFolder($root, 0);
+                }
+                ?>
+            </select>
         </div>
 
         <div class="form-group">
-            <div class="col-sm-12">
-                <button type="submit" name="action" value="sync" class="btn btn-primary">Kopiera till Google Drive
-                </button>
-            </div>
+            <button type="submit" name="action" value="sync" class="btn btn-primary">Kopiera till Google Drive</button>
         </div>
     </form>
 
-    <p>
-        <button type="button" class="btn btn-default btn-xs"
-                onclick="$('#sync-form-result > p:has(span.label-default)').toggleClass('hidden')">
-            Visa/dölj filer som redan fanns på Google Drive
-        </button>
-    </p>
-
+        <div class="<?=$do_sync_action ? 'show' : 'hidden'?>">
+            <button type="button" class="btn btn-default btn-xs"
+                    onclick="$('#sync-form-result > p:has(span.label-default)').toggleClass('hidden')">
+                Visa/dölj filer som redan fanns på Google Drive
+            </button>
+        </div>
 
     <div id="sync-form-result">
         <?php
-        if (isset($_POST['action']) && $_POST['action'] == 'sync') {
+        if ($do_sync_action) {
             $folder_id = $_POST['target_folder'];
             if (!empty($folder_id)) {
                 $drive_service = new Google_Service_Drive($client);

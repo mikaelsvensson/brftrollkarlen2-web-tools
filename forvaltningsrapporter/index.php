@@ -77,7 +77,7 @@ function printReportsMenu($selectedReportId)
                     printReportsMenu($reportId);
                     ?>
                     <li class="<?= $reportId == 'custom' ? 'active' : '' ?>"><a href="?report=custom">Egen...</a></li>
-                    <li class="<?= $reportId == 'sync' ? 'active' : '' ?>"><a href="?report=sync">Synka...</a></li>
+                    <li class="<?= $reportId == 'sync' ? 'active' : '' ?>"><a href="?report=sync">Kopiera till Google Drive...</a></li>
                 </ul>
             </div>
         </div>
