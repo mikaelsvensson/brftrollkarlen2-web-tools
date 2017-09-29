@@ -66,92 +66,109 @@ $local_file_names = scandir($cfg['reports']['archive_folder'], SCANDIR_SORT_ASCE
         </div>
     </form>
 
-    <?php
-    if (isset($_POST['action']) && $_POST['action'] == 'sync') {
-        $folder_id = $_POST['target_folder'];
-        if (!empty($folder_id)) {
-            $drive_service = new Google_Service_Drive($client);
+    <p>
+        <button type="button" class="btn btn-default btn-xs"
+                onclick="$('#sync-form-result > p:has(span.label-default)').toggleClass('hidden')">
+            Visa/dölj filer som redan fanns på Google Drive
+        </button>
+    </p>
 
-            // Fetch Google Docs and RFT documents, and also folders.
-            $query = sprintf("'%s' in parents and trashed = false", $folder_id);
+
+    <div id="sync-form-result">
+        <?php
+        if (isset($_POST['action']) && $_POST['action'] == 'sync') {
+            $folder_id = $_POST['target_folder'];
+            if (!empty($folder_id)) {
+                $drive_service = new Google_Service_Drive($client);
+
+                // Fetch Google Docs and RFT documents, and also folders.
+                $query = sprintf("'%s' in parents and trashed = false", $folder_id);
 //            printf('<p>Query: %s</p>', $query);
-            $remote_files = $drive_service->files->listFiles(array(
-                "q" => $query,
-                "fields" => "files(appProperties,id,name,parents),kind,nextPageToken",
-                "pageSize" => 1000
-            ))->getFiles();
+                $remote_files = $drive_service->files->listFiles(array(
+                    "q" => $query,
+                    "fields" => "files(size,id,name,parents),kind,nextPageToken",
+                    "pageSize" => 1000
+                ))->getFiles();
 
-            // Find out the folder id of the user's Google Drive root.
-            $roots = [
-                $drive_service->files->get("root", array("fields" => "id"))->id
-            ];
+                // Find out the folder id of the user's Google Drive root.
+                $roots = [
+                    $drive_service->files->get("root", array("fields" => "id"))->id
+                ];
 
-            // Sort the list of files (and folders) by name.
-            usort($remote_files, function ($a, $b) {
-                return strcmp($a->name, $b->name);
-            });
+                // Sort the list of files (and folders) by name.
+                usort($remote_files, function ($a, $b) {
+                    return strcmp($a->name, $b->name);
+                });
 
-            $remote_file_names = array_map(function ($item) {
-                return $item->name;
-            }, $remote_files);
+                $remote_file_names = array_map(function ($item) {
+                    return $item->name;
+                }, $remote_files);
 
-            $files_to_copy = $local_file_names;
+                $remote_file_sizes = array_combine($remote_file_names, array_map(function ($item) {
+                    return $item->size;
+                }, $remote_files));
+
+                $files_to_copy = $local_file_names;
 //            $files_to_copy = array_diff($local_file_names, $remote_file_names);
 //            $files_to_copy = array_splice($files_to_copy, 0, 5);
 
-            $total_file_duration = 1.0;
-            $total_file_count = 0;
-            $avg_file_duration = 1.0;
+                $total_file_duration = 1.0;
+                $total_file_count = 0;
+                $avg_file_duration = 1.0;
 
-            $before_upload_time = microtime(true) - $script_start_time;
-            $max_script_execution_time = intval(ini_get('max_execution_time'));
-            $max_time = $max_script_execution_time * 0.8;
+                $before_upload_time = microtime(true) - $script_start_time;
+                $max_script_execution_time = intval(ini_get('max_execution_time'));
+                $max_time = $max_script_execution_time * 0.8;
 
-            $result = array();
+                $result = array();
 
-            foreach ($files_to_copy as $file_to_copy) {
-                if ($file_to_copy == '.' || $file_to_copy == '..') {
-                    continue;
-                }
-
-                if (!in_array($file_to_copy, $remote_file_names)) {
-                    $estimated_time = $before_upload_time + $total_file_duration + $avg_file_duration;
-                    if ($estimated_time < $max_time) {
-                        $start_current_file = microtime(true);
-
-                        $file_path = $cfg['reports']['archive_folder'] . $file_to_copy;
-                        $content = file_get_contents($file_path);
-
-                        $fileMetadata = new Google_Service_Drive_DriveFile(array(
-                            'name' => $file_to_copy,
-                            'mimeType' => 'application/pdf',
-                            'parents' => [$folder_id]));
-                        $file = $drive_service->files->create($fileMetadata, array(
-                            'data' => $content,
-                            'mimeType' => 'application/pdf',
-                            'uploadType' => 'multipart',
-                            'fields' => 'id'));
-
-                        $end_current_file = microtime(true);
-                        $current_file_duration = $end_current_file - $start_current_file;
-                        $total_file_duration += $current_file_duration;
-                        $total_file_count += 1;
-                        $avg_file_duration = $total_file_duration / $total_file_count;
-                        $result[$file_to_copy] = 'Kopierad.';
-                    } else {
-                        $result[$file_to_copy] = 'Tiden tog slut. F&ouml;rs&ouml;k igen.';
+                foreach ($files_to_copy as $file_to_copy) {
+                    if ($file_to_copy == '.' || $file_to_copy == '..') {
+                        continue;
                     }
-                } else {
-//                    $result[$file_to_copy] = 'Kopierad sedan tidigare.';
-                }
-            }
 
-            foreach ($result as $file_name => $status) {
-                printf('<p>%s: %s</p>', $file_name, $status);
+                    $remote_file_size = isset($remote_file_sizes[$file_to_copy]) ? $remote_file_sizes[$file_to_copy] : -1;
+                    $file_path = $cfg['reports']['archive_folder'] . $file_to_copy;
+                    $local_file_size = filesize($file_path);
+
+                    if (!in_array($file_to_copy, $remote_file_names) || $remote_file_size != $local_file_size) {
+                        $estimated_time = $before_upload_time + $total_file_duration + $avg_file_duration;
+                        if ($estimated_time < $max_time) {
+                            $start_current_file = microtime(true);
+
+                            $content = file_get_contents($file_path);
+
+                            $fileMetadata = new Google_Service_Drive_DriveFile(array(
+                                'name' => $file_to_copy,
+                                'mimeType' => 'application/pdf',
+                                'parents' => [$folder_id]));
+                            $file = $drive_service->files->create($fileMetadata, array(
+                                'data' => $content,
+                                'mimeType' => 'application/pdf',
+                                'uploadType' => 'multipart',
+                                'fields' => 'id'));
+
+                            $end_current_file = microtime(true);
+                            $current_file_duration = $end_current_file - $start_current_file;
+                            $total_file_duration += $current_file_duration;
+                            $total_file_count += 1;
+                            $avg_file_duration = $total_file_duration / $total_file_count;
+                            $result[$file_to_copy] = '<span class="label label-success">Kopierad.</span>';
+                        } else {
+                            $result[$file_to_copy] = '<span class="label label-warning">Tiden tog slut. F&ouml;rs&ouml;k igen.</span>';
+                        }
+                    } else {
+                        $result[$file_to_copy] = sprintf('<span class="label label-default">Kopierad sedan tidigare.</span>');
+                    }
+                }
+
+                foreach ($result as $file_name => $status) {
+                    printf('<p><span style="display: inline-block; width: 30em">%s:</span> %s</p>', $file_name, $status);
+                }
+            } else {
+                printf('<p>Ojd&aring;! Du valde ingen mapp.</p>');
             }
-        } else {
-            printf('<p>Ojd&aring;! Du valde ingen mapp.</p>');
         }
-    }
-    ?>
+        ?>
+    </div>
 </div>
