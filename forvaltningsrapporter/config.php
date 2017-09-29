@@ -50,7 +50,7 @@ function getGoogleContacts($client)
     $response = $httpClient->get($feedURL);
 
     if ($response->getStatusCode() != 200) {
-        printf('<p>Kunde inte h&auml;mta kontaktlistan. Felkod %d.</p>', $response->getStatusCode());
+        throw new Exception(sprintf('Kunde inte h&auml;mta kontaktlistan. Felkod %d.', $response->getStatusCode()));
     }
 
     $body = json_decode($response->getBody(), true)['feed']['entry'];
