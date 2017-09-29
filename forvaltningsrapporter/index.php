@@ -1,6 +1,7 @@
 <?php
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
+$script_start_time = microtime(true);
 require_once 'config.php';
 require_once 'google-util.php';
 require_once 'index-showreport-latest.php';
@@ -15,6 +16,7 @@ $authorized_user = $cfg['google']['authorized_gmail_user'].'@gmail.com';
 if ($_SESSION['email'] != $authorized_user) {
     die("Only $authorized_user may access this page.");
 };
+
 
 $reportId = @$_GET['report'];
 
@@ -69,25 +71,23 @@ function printReportsMenu($selectedReportId)
 
     <nav class="navbar navbar-default">
         <div class="container-fluid">
-            <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#">Rapporter:</a>
-            </div>
-            <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
                     <?php
                     printReportsMenu($reportId);
                     ?>
                     <li class="<?= $reportId == 'custom' ? 'active' : '' ?>"><a href="?report=custom">Egen...</a></li>
+                    <li class="<?= $reportId == 'sync' ? 'active' : '' ?>"><a href="?report=sync">Synka...</a></li>
                 </ul>
-            </div><!-- /.navbar-collapse -->
-        </div><!-- /.container-fluid -->
+            </div>
+        </div>
     </nav>
     <?php
 
     if ($reportId == 'custom') {
         readfile('index-custom-report-form.html');;
+    } elseif ($reportId == 'sync') {
+        include 'index-sync-form.php';
     } elseif (isset($REPORTS[$reportId])) {
         printReport($reportId, $contacts);
     }
