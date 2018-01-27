@@ -9,8 +9,6 @@ require_once 'ReportReader.php';
 require_once 'config.php';
 require_once '../lib/PdfParser.php';
 
-//TODO: How is the execution of this script scheduled since One.com does not provide a scheduler (right?). Are we using some king of public "web ping service" pointed to this script? Maybe IFTTT.com?
-
 $cookie = null;
 
 function getAuthCookie($stofastUser, $stofastPassword)
