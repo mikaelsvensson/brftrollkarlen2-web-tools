@@ -13,26 +13,26 @@ require_once '../lib/PdfParser.php';
 
 $cookie = null;
 
-function getAuthCookie()
+function getAuthCookie($stofastUser, $stofastPassword)
 {
     global $cookie;
     if (!isset($cookie)) {
-        $ModDate = getModDate();
+        $modDate = getModDate();
 
-        $cookieHeader = getAuthCookieHeader($ModDate);
+        $cookieHeader = getAuthCookieHeader($modDate, $stofastUser, $stofastPassword);
 
-        $cookie = "Userid=" . STOFAST_USERNAME . ";" . strtok($cookieHeader, ";");
+        $cookie = "Userid=" . $stofastUser . ";" . strtok($cookieHeader, ";");
     }
     return $cookie;
 }
 
-function getAuthCookieHeader($ModDate)
+function getAuthCookieHeader($modDate, $stofastUser, $stofastPassword)
 {
     $params = array(
-        "%%ModDate" => $ModDate,
+        "%%ModDate" => $modDate,
         "RedirectTo" => "/ts/gosud.nsf/redirect_login?openagent",
-        "Username" => STOFAST_USERNAME,
-        "Password" => STOFAST_PASSWORD
+        "Username" => $stofastUser,
+        "Password" => $stofastPassword
     );
 
     $ch = curl_init('https://entre.stofast.se/names.nsf?Login');
@@ -67,11 +67,11 @@ function getModDate()
     return $ModDate;
 }
 
-function downloadFileFromUrl($filename, $url)
+function downloadFileFromUrl($filename, $url, $stofastUser, $stofastPassword)
 {
     $fp = fopen($filename, 'wb');
     $handle = curl_init($url);
-    curl_setopt($handle, CURLOPT_HTTPHEADER, array("Cookie: " . getAuthCookie()));
+    curl_setopt($handle, CURLOPT_HTTPHEADER, array("Cookie: " . getAuthCookie($stofastUser, $stofastPassword)));
     curl_setopt($handle, CURLOPT_FILE, $fp);
     curl_setopt($handle, CURLOPT_HEADER, false);
     curl_exec($handle);
@@ -88,13 +88,17 @@ $cfg = parse_ini_file("config.ini", true);
 
 $downloadReportsToday = in_array(substr($timestamp, -2), explode(',', $cfg['reports']['trigger_days_of_months']));
 
-function sendMail($subject, $template, $templateProperties)
+$mailTo = $cfg['mail']['to'];
+$stofastUser = $cfg['entre']['username'];
+$stofastPassword = $cfg['entre']['password'];
+
+function sendMail($to, $subject, $template, $templateProperties)
 {
     $body = utf8_decode(file_get_contents($template));
     $body = str_replace(array_keys($templateProperties), array_values($templateProperties), $body);
     $additionalHeaders = implode("\r\n", array("From: info@trollkarlen2.se", "Content-Type: text/plain; charset=UTF-8"));
     mail(
-        MAIL_TO,
+        $to,
         $subject,
         utf8_encode($body),
         $additionalHeaders);
@@ -111,7 +115,7 @@ if ($force || $downloadReportsToday) {
         $filename = $cfg['reports']['archive_folder'] . $title . '-' . $timestamp . '.pdf';
         $isReportDownloaded = file_exists($filename);
         if ($force || !$isReportDownloaded) {
-            $contentType = downloadFileFromUrl($filename, $url);
+            $contentType = downloadFileFromUrl($filename, $url, $stofastUser, $stofastPassword);
             if ($contentType == 'application/pdf') {
                 $savedReports[] = $filename;
                 if ($reportCfg->getAfterDownloadProcessor() != null) {
@@ -127,13 +131,17 @@ if ($force || $downloadReportsToday) {
                     'CONTENT_TYPE' => $contentType,
                     'STOFAST_USERNAME' => STOFAST_USERNAME
                 );
-                sendMail("[Forvaltningsrapporter] Kunde inte ladda ner rapport", "download-report-mail-contenttypeerror.utf8.txt", $props);
+                sendMail($mailTo,
+                    "[Forvaltningsrapporter] Kunde inte ladda ner rapport",
+                    "download-report-mail-contenttypeerror.utf8.txt",
+                    $props);
                 break;
             }
         }
     }
     if (count($savedReports) > 0) {
-        sendMail("[Forvaltningsrapporter] Rapporter nedladdade",
+        sendMail($mailTo,
+            "[Forvaltningsrapporter] Rapporter nedladdade",
             "download-report-mail-savedreports.utf8.txt",
             array("REPORTS" => implode("\n - ", $savedReports)));
     }

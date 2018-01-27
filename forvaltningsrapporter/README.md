@@ -31,18 +31,17 @@ Verktyget består av tre delar:
 
 Verktyget använder sig av tre konfigurationsfiler.
 
-### Entré-inloggning
+### Lösenord mm.
 
-Filen config-credentials.php innehåller användarnamn och lösenord till Entré:
+Filen config.ini innehåller följande inställningar:
+
+* Lösenord till Entré
+* E-postadress att skicka statusrapporter till
+* Datumintervall för rapportnedladdning
+* Mappnamn på servern
+* Inställningar för Google-inloggning och Google Drive-integration
  
-    <?php
-    const STOFAST_USERNAME = "YOUR_STOFAST_USERNAME_HERE";
-    const STOFAST_PASSWORD = "YOUR_STOFAST_PASSWORD_HERE";
-    ?>
-    
-Filen finns inte incheckad i Git och måste därför skapas manuellt i samma mapp som config.php ligger i.
-
-Använd forvaltningsrapporter/config-credentials.sample.php som mall.
+Filen finns incheckad i Git så kom ihåg att _inte_ spara de riktiga lösenorden i Git.
 
 ### Rapportbeskrivningar
 
